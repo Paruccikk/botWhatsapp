@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Ativar Bot</title>
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <header>
+        <nav>
+            <a class="logo" href="index.html">BOT IA</a>
+            <div class="mobile-menu">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Início</a></li>
+                <li><a href="contato.html">Contato</a></li>
+                <li><a href="admin.html">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Título e formulário -->
+    <br><br><br>
+    <h1 class="page-title">Ativar o Bot do WhatsApp</h1>
+    <form id="activationForm">
+        <label for="accessKey">Digite sua chave de acesso:</label>
+        <input type="text" id="accessKey" name="accessKey" required>
+        
+        <label for="phoneNumber">Digite seu número de telefone:</label>
+        <input type="text" id="phoneNumber" name="phoneNumber" required>
+        
+        <button type="submit">Ativar BOT</button>
+    </form>
+    
+    <div id="qrCodeSection" style="display: none;">
+        <h2>Escaneie o QR Code para ativar o bot:</h2>
+        <img id="qrCodeImage" src="" alt="QR Code">
+    </div>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="footer-container">
+            <div class="content">
+                <div class="footer-top">
+                    <div class="footer-contact">
+                        <br><br>
+                        <p> IA WhatsApp </p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>⚡ Desenvolvido por Daniel Parucci | 2024 - 2025</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Função para ativar o bot ao submeter a chave de acesso
+        document.getElementById('activationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const accessKey = document.getElementById('accessKey').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            // Verificar se a chave é válida e se não expirou
+            const isKeyValid = await fetch(`http://localhost:3000/validate-key?accessKey=${accessKey}&phoneNumber=${phoneNumber}`)
+                .then(res => res.json())
+                .then(data => data.isValid);
+
+            if (isKeyValid) {
+                // Chave válida, agora exibe o QR code
+                const response = await fetch('http://localhost:3000/generate-qr');
+                const data = await response.json();
+
+                // Exibe o QR Code na tela
+                document.getElementById('qrCodeSection').style.display = 'block';
+                document.getElementById('qrCodeImage').src = data.qrCodeUrl;
+            } else {
+                alert("Chave inválida ou expirada! Entre em contato com o administrador.");
+            }
+        });
+    </script>
+</body>
+</html>
