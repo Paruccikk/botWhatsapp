@@ -36,6 +36,20 @@ const saveKeys = (keys) => {
     fs.writeFileSync('keys.json', JSON.stringify(keys, null, 2), 'utf8');
 };
 
+// Função auxiliar para carregar o status do bot dos usuários
+const loadBotStatus = () => {
+    try {
+        return JSON.parse(fs.readFileSync('botStatus.json', 'utf8')); // Certifique-se de que 'botStatus.json' existe ou crie-o
+    } catch (error) {
+        return {};
+    }
+};
+
+// Função auxiliar para salvar o status do bot
+const saveBotStatus = (status) => {
+    fs.writeFileSync('botStatus.json', JSON.stringify(status, null, 2), 'utf8');
+};
+
 // Endpoint para carregar todas as chaves registradas
 app.get('/get-keys', (req, res) => {
     try {
@@ -126,6 +140,49 @@ app.get('/generate-qr', (req, res) => {
     }
 });
 
+// Endpoint para ligar/desligar o bot de um usuário específico
+app.post('/desligar-bot', (req, res) => {
+    const { numero } = req.body;
+
+    if (!numero) {
+        return res.status(400).json({ error: 'Número de telefone é obrigatório.' });
+    }
+
+    const botStatus = loadBotStatus();
+
+    // Verifica se o bot já está desligado
+    if (botStatus[numero] && botStatus[numero] === 'desligado') {
+        return res.status(400).json({ error: 'Bot já está desligado para este número.' });
+    }
+
+    // Desliga o bot para o número
+    botStatus[numero] = 'desligado';
+    saveBotStatus(botStatus);
+
+    res.json({ message: `Bot desligado para o número ${numero}.` });
+});
+
+app.post('/ligar-bot', (req, res) => {
+    const { numero } = req.body;
+
+    if (!numero) {
+        return res.status(400).json({ error: 'Número de telefone é obrigatório.' });
+    }
+
+    const botStatus = loadBotStatus();
+
+    // Verifica se o bot já está ligado
+    if (botStatus[numero] && botStatus[numero] === 'ativo') {
+        return res.status(400).json({ error: 'Bot já está ligado para este número.' });
+    }
+
+    // Liga o bot para o número
+    botStatus[numero] = 'ativo';
+    saveBotStatus(botStatus);
+
+    res.json({ message: `Bot ligado para o número ${numero}.` });
+});
+
 // Permite todas as origens (você pode especificar apenas as origens que deseja)
 app.use(cors());
 
@@ -133,4 +190,3 @@ app.use(cors());
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
-

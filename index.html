@@ -42,6 +42,11 @@
         <img id="qrCodeImage" src="" alt="QR Code">
     </div>
 
+    <!-- Botão de ligar/desligar bot -->
+    <div id="botControlSection">
+        <button id="toggleBotButton" style="background-color: red;">Desligar Bot</button>
+    </div>
+
     <!-- Rodapé -->
     <footer>
         <div class="footer-container">
@@ -81,6 +86,40 @@
                 document.getElementById('qrCodeImage').src = data.qrCodeUrl;
             } else {
                 alert("Chave inválida ou expirada! Entre em contato com o administrador.");
+            }
+        });
+
+        // Função para ligar/desligar o bot
+        document.getElementById('toggleBotButton').addEventListener('click', async function() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            if (!phoneNumber) {
+                alert("Digite seu número de telefone primeiro!");
+                return;
+            }
+
+            // Verifica o estado do bot e alterna entre ligado/desligado
+            const botStatus = await fetch(`https://botwhatsapp-oxct.onrender.com/get-bot-status?phoneNumber=${phoneNumber}`)
+                .then(res => res.json())
+                .then(data => data.status);
+
+            const action = botStatus === 'ativo' ? 'desligar-bot' : 'ligar-bot';
+            
+            // Envia a solicitação para o servidor para mudar o estado do bot
+            const response = await fetch(`https://botwhatsapp-oxct.onrender.com/${action}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ numero: phoneNumber })
+            });
+
+            if (response.ok) {
+                const newStatus = action === 'desligar-bot' ? 'desligado' : 'ativo';
+                document.getElementById('toggleBotButton').style.backgroundColor = newStatus === 'ativo' ? 'green' : 'red';
+                document.getElementById('toggleBotButton').textContent = newStatus === 'ativo' ? 'Desligar Bot' : 'Ligar Bot';
+            } else {
+                alert("Erro ao atualizar o estado do bot. Tente novamente mais tarde.");
             }
         });
     </script>
