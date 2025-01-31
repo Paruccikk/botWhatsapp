@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Função para exibir todas as chaves cadastradas
     function carregarUsuarios() {
         // Altere a URL para apontar para o servidor backend correto
-        fetch("http://localhost:3000/get-keys")  // Alterado para 3000
+        fetch("https://meu-app.onrender.com/get-keys")  // Alterado para 3000
             .then(response => response.json())
             .then(keys => {
                 listaUsuarios.innerHTML = "";
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const chave = document.getElementById("chave-cadastro").value;
 
         // Envia os dados para o backend
-        fetch("http://localhost:3000/cadastrar-usuario", {  // Alterado para 3000
+        fetch("https://meu-app.onrender.com/cadastrar-usuario", {  // Alterado para 3000
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ numero, chave })
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const numero = document.getElementById("numero-renovar").value;
 
         // Envia a solicitação para renovar a chave
-        fetch("http://localhost:3000/renovar-chave", {  // Alterado para 3000
+        fetch("https://meu-app.onrender.com/renovar-chave", {  // Alterado para 3000
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ numero })

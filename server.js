@@ -125,7 +125,13 @@ app.get('/generate-qr', (req, res) => {
     }
 });
 
+const cors = require('cors');
+
+// Permite todas as origens (você pode especificar apenas as origens que deseja)
+app.use(cors());
+
 // Iniciando o servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
+
