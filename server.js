@@ -86,7 +86,8 @@ app.post('/perguntar-ia', async (req, res) => {
 });
 
 // Serve todos os arquivos da pasta botWhatsapp
-app.use(express.static(path.join(__dirname))); // Serve todos os arquivos da pasta botWhatsapp
+app.use(express.static(__dirname));
+ // Serve todos os arquivos da pasta botWhatsapp
 
 // Rota para admin.html
 app.get("/admin", (req, res) => {
