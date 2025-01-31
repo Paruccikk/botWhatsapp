@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Gerenciar Chaves 🔑</title>
+    <link rel="stylesheet" href="admin.css"> <!-- Arquivo CSS externo -->
+</head>
+
+<body>
+    <br><br>
+    <header>
+        <h1>🔑 Painel de Administração</h1>
+    </header>
+
+    <div class="container">
+        <h2>👤 Cadastrar Novo Usuário</h2>
+        <form id="form-cadastrar">
+            <input type="text" id="numero-cadastro" placeholder="📞 Número com DDD" required>
+            <input type="text" id="chave-cadastro" placeholder="🔑 Chave de Acesso" required>
+            <button type="submit">➕ Cadastrar</button>
+        </form>
+
+        <h2>♻️ Renovar Chave de Acesso</h2>
+        <form id="form-renovar">
+            <input type="text" id="numero-renovar" placeholder="🔑 Número de Telefone" required>
+            <button type="submit">🔄 Renovar</button>
+        </form>
+
+        <h2>📋 Lista de Chaves Registradas</h2>
+        <table id="keysTable">
+            <thead>
+                <tr>
+                    <th>📞 Número</th>
+                    <th>🔑 Chave</th>
+                    <th>📅 Expiração</th>
+                    <th>⚙️ Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Chaves serão carregadas aqui -->
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <center><p>⚡ Desenvolvido por Daniel Parucci | 2024 - 2025</p></center>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tabelaChaves = document.getElementById("keysTable").getElementsByTagName("tbody")[0];
+            const formCadastrar = document.getElementById("form-cadastrar");
+
+            async function carregarChaves() {
+                try {
+                    const response = await fetch("http://localhost:3000/get-keys");
+                    
+                    if (!response.ok) {
+                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                    }
+
+                    const text = await response.text(); // Obtém o texto bruto da resposta
+                    if (!text) {
+                        throw new Error("Resposta do servidor está vazia.");
+                    }
+
+                    const keys = JSON.parse(text); // Converte para JSON
+
+                    tabelaChaves.innerHTML = "";
+                    Object.keys(keys).forEach(numero => {
+                        const keyData = keys[numero];
+                        const row = tabelaChaves.insertRow();
+                        row.insertCell(0).textContent = numero;
+                        row.insertCell(1).textContent = keyData.accessKey;
+                        row.insertCell(2).textContent = keyData.expiresAt;
+                        row.insertCell(3).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${numero}')">🔄 Renovar</button>`;
+                    });
+                } catch (error) {
+                    console.error("Erro ao carregar chaves:", error);
+                    alert(error.message);
+                }
+            }
+
+            // Cadastro de novo usuário
+            formCadastrar.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const numero = document.getElementById("numero-cadastro").value;
+                const chave = document.getElementById("chave-cadastro").value;
+
+                try {
+                    const response = await fetch("http://localhost:3000/cadastrar-usuario", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ numero, chave })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.text();
+                        throw new Error(errorData || "Erro ao cadastrar usuário");
+                    }
+
+                    const text = await response.text();
+                    if (!text) {
+                        throw new Error("Resposta do servidor está vazia.");
+                    }
+
+                    const data = JSON.parse(text);
+                    alert(data.message);
+                    carregarChaves();
+                } catch (error) {
+                    console.error("Erro:", error.message);
+                    alert("Erro: " + error.message);
+                }
+            });
+
+            carregarChaves();
+        });
+    </script>
+</body>
+</html>
