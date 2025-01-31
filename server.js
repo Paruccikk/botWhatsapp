@@ -5,12 +5,23 @@ const client = require('./whatsappClient'); // Importa o cliente WhatsApp
 const crypto = require('crypto'); // Para geração de chaves seguras
 const path = require("path");
 
+const express = require("express");
+const path = require("path");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Usando middleware para interpretar o corpo das requisições (necessário para POST)
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public"))); // Servindo arquivos estáticos
+// Servir arquivos estáticos diretamente da raiz do projeto
+app.use(express.static(path.join(__dirname))); // Serve todos os arquivos da pasta botWhatsapp
+
+// Rota principal servindo index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
 
 // Função auxiliar para carregar as chaves do arquivo
 const loadKeys = () => {
