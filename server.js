@@ -5,27 +5,20 @@ const client = require('./whatsappClient'); // Importa o cliente WhatsApp
 const crypto = require('crypto'); // Para geração de chaves seguras
 const path = require("path");
 
-const express = require("express");
-const path = require("path");
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
- // Serve todos os arquivos da pasta botWhatsapp
+// Serve todos os arquivos da pasta botWhatsapp
 app.use(express.static(path.join(__dirname))); // Serve todos os arquivos da pasta botWhatsapp
 
+// Rota para admin.html
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
 
-
 // Rota principal servindo index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
 
 // Função auxiliar para carregar as chaves do arquivo
@@ -41,11 +34,6 @@ const loadKeys = () => {
 const saveKeys = (keys) => {
     fs.writeFileSync('keys.json', JSON.stringify(keys, null, 2), 'utf8');
 };
-
-// Rota principal servindo index.html
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
 
 // Endpoint para carregar todas as chaves registradas
 app.get('/get-keys', (req, res) => {
