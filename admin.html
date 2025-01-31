@@ -54,7 +54,7 @@
 
             async function carregarChaves() {
                 try {
-                    const response = await fetch("http://localhost:3000/get-keys");
+                    const response = await fetch("https://botwhatsapp-oxct.onrender.com/get-keys");
                     
                     if (!response.ok) {
                         throw new Error(`Erro ${response.status}: ${response.statusText}`);
@@ -89,7 +89,7 @@
                 const chave = document.getElementById("chave-cadastro").value;
 
                 try {
-                    const response = await fetch("http://localhost:3000/cadastrar-usuario", {
+                    const response = await fetch("https://botwhatsapp-oxct.onrender.com/cadastrar-usuario", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ numero, chave })
