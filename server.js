@@ -103,7 +103,7 @@ app.post('/cadastrar-usuario', express.json(), (req, res) => { // Express JSON m
 });
 
 // Endpoint para renovar a chave de acesso de um usuário
-app.post('/renovar-chave', express.json(), (req, res) => { // Express JSON middleware adicionado
+app.post('/renovar-chave', (req, res) => {
     try {
         const { numero } = req.body;
 
@@ -120,7 +120,7 @@ app.post('/renovar-chave', express.json(), (req, res) => { // Express JSON middl
         // Gerar nova chave e atualizar a data de expiração
         const newAccessKey = crypto.randomBytes(16).toString('hex');
         const newExpiresAt = new Date();
-        newExpiresAt.setDate(newExpiresAt.getDate() + 30); // Renovar por 30 dias
+        newExpiresAt.setDate(newExpiresAt.getDate() + 30);  // Alteração aqui para adicionar 30 dias
 
         keys[numero] = { accessKey: newAccessKey, expiresAt: newExpiresAt.toISOString() };
         saveKeys(keys);
