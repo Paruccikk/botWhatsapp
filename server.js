@@ -1,13 +1,89 @@
 const express = require('express');
-const cors = require('cors');  // Importado uma única vez
 const fs = require('fs');
-const client = require('./whatsappClient');
+const cors = require('cors');
 const crypto = require('crypto');
-const path = require("path");
+const { obterRespostaIA } = require('./aiService'); // Importa IA
+require('dotenv').config();
 
 const app = express();
+app.use(express.json());
+app.use(cors());
 
 const PORT = process.env.PORT || 3000;
+
+
+// Função para carregar usuários
+const loadUsers = () => {
+    try {
+        return JSON.parse(fs.readFileSync('keys.json', 'utf8'));
+    } catch (error) {
+        return {};
+    }
+};
+
+// Função para salvar usuários
+const saveUsers = (users) => {
+    fs.writeFileSync('keys.json', JSON.stringify(users, null, 2), 'utf8');
+};
+
+// 🟢 Cadastro de Usuário e Empresa
+app.post('/cadastrar-usuario', (req, res) => {
+    const { numero, senha, empresa } = req.body;
+
+    if (!numero || !senha || !empresa) {
+        return res.status(400).json({ error: 'Número, senha e empresa são obrigatórios.' });
+    }
+
+    const users = loadUsers();
+
+    if (users[numero]) {
+        return res.status(400).json({ error: 'Número já cadastrado.' });
+    }
+
+    // Criar chave de acesso e definir expiração (30 dias)
+    const accessKey = crypto.randomBytes(16).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    users[numero] = {
+        password: senha,
+        accessKey,
+        expiresAt: expiresAt.toISOString(),
+        empresa
+    };
+
+    saveUsers(users);
+    res.status(200).json({ message: 'Usuário cadastrado com sucesso!', accessKey });
+});
+
+// 🟢 Login
+app.post('/login', (req, res) => {
+    const { numero, senha } = req.body;
+
+    if (!numero || !senha) {
+        return res.status(400).json({ error: 'Número e senha são obrigatórios.' });
+    }
+
+    const users = loadUsers();
+
+    if (!users[numero] || users[numero].password !== senha) {
+        return res.status(401).json({ error: 'Credenciais inválidas.' });
+    }
+
+    res.json({ message: 'Login realizado com sucesso!', userData: users[numero] });
+});
+
+// 🟢 Gerar Resposta da IA
+app.post('/perguntar-ia', async (req, res) => {
+    const { numero, mensagem } = req.body;
+
+    if (!numero || !mensagem) {
+        return res.status(400).json({ error: 'Número e mensagem são obrigatórios.' });
+    }
+
+    const resposta = await obterRespostaIA(mensagem, numero);
+    res.json({ resposta });
+});
 
 // Serve todos os arquivos da pasta botWhatsapp
 app.use(express.static(path.join(__dirname))); // Serve todos os arquivos da pasta botWhatsapp
@@ -130,6 +206,7 @@ app.post('/renovar-chave', (req, res) => {
         res.status(500).json({ error: 'Erro ao renovar chave.' });
     }
 });
+
 
 // Endpoint para obter o QR Code
 app.get('/generate-qr', (req, res) => {
