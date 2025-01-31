@@ -126,8 +126,6 @@ app.get('/generate-qr', (req, res) => {
     }
 });
 
-const cors = require('cors');
-
 // Permite todas as origens (você pode especificar apenas as origens que deseja)
 app.use(cors());
 
