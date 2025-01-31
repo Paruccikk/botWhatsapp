@@ -1,21 +1,21 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const client = require('./whatsappClient'); // Importa o cliente WhatsApp
 const crypto = require('crypto'); // Para geração de chaves seguras
+const path = require("path");
 
-// Inicializa o servidor Express
 const app = express();
-app.use(cors());
-app.use(express.json()); // Permite receber JSON no body das requisições
+const PORT = process.env.PORT || 3000;
 
-const KEYS_FILE = 'keys.json';
+// Usando middleware para interpretar o corpo das requisições (necessário para POST)
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public"))); // Servindo arquivos estáticos
 
 // Função auxiliar para carregar as chaves do arquivo
 const loadKeys = () => {
     try {
-        return JSON.parse(fs.readFileSync(KEYS_FILE, 'utf8'));
+        return JSON.parse(fs.readFileSync('keys.json', 'utf8')); // Certifique-se de que 'keys.json' existe ou crie-o
     } catch (error) {
         return {};
     }
@@ -23,8 +23,13 @@ const loadKeys = () => {
 
 // Função auxiliar para salvar as chaves no arquivo
 const saveKeys = (keys) => {
-    fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2), 'utf8');
+    fs.writeFileSync('keys.json', JSON.stringify(keys, null, 2), 'utf8');
 };
+
+// Rota principal servindo index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 // Endpoint para carregar todas as chaves registradas
 app.get('/get-keys', (req, res) => {
@@ -56,7 +61,6 @@ app.get('/validate-key', (req, res) => {
     }
 });
 
-
 // Endpoint para cadastrar um novo usuário
 app.post('/cadastrar-usuario', (req, res) => {
     try {
@@ -78,10 +82,6 @@ app.post('/cadastrar-usuario', (req, res) => {
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 });
-
-
-
-
 
 // Endpoint para renovar a chave de acesso de um usuário
 app.post('/renovar-chave', (req, res) => {
@@ -112,7 +112,6 @@ app.post('/renovar-chave', (req, res) => {
     }
 });
 
-
 // Endpoint para obter o QR Code
 app.get('/generate-qr', (req, res) => {
     if (global.qrCodeUrl) {
@@ -122,9 +121,7 @@ app.get('/generate-qr', (req, res) => {
     }
 });
 
-
-// Inicia o servidor na porta 3000
-const PORT = process.env.PORT || 3000;
+// Iniciando o servidor
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
