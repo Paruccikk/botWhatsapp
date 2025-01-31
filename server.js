@@ -1,11 +1,12 @@
 const express = require('express');
-const cors = require('cors');
+const cors = require('cors');  // Importado uma única vez
 const fs = require('fs');
-const client = require('./whatsappClient'); // Importa o cliente WhatsApp
-const crypto = require('crypto'); // Para geração de chaves seguras
+const client = require('./whatsappClient');
+const crypto = require('crypto');
 const path = require("path");
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
 // Serve todos os arquivos da pasta botWhatsapp
