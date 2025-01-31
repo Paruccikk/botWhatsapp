@@ -81,7 +81,7 @@ app.get('/validate-key', (req, res) => {
 });
 
 // Endpoint para cadastrar um novo usuário
-app.post('/cadastrar-usuario', (req, res) => {
+app.post('/cadastrar-usuario', express.json(), (req, res) => { // Express JSON middleware adicionado
     try {
         const { numero, chave } = req.body;
         if (!numero || !chave) {
@@ -103,7 +103,7 @@ app.post('/cadastrar-usuario', (req, res) => {
 });
 
 // Endpoint para renovar a chave de acesso de um usuário
-app.post('/renovar-chave', (req, res) => {
+app.post('/renovar-chave', express.json(), (req, res) => { // Express JSON middleware adicionado
     try {
         const { numero } = req.body;
 
@@ -120,7 +120,7 @@ app.post('/renovar-chave', (req, res) => {
         // Gerar nova chave e atualizar a data de expiração
         const newAccessKey = crypto.randomBytes(16).toString('hex');
         const newExpiresAt = new Date();
-        newExpiresAt.setDate(newExpiresAt.getDate() + 30);
+        newExpiresAt.setDate(newExpiresAt.getDate() + 30); // Renovar por 30 dias
 
         keys[numero] = { accessKey: newAccessKey, expiresAt: newExpiresAt.toISOString() };
         saveKeys(keys);
@@ -141,7 +141,7 @@ app.get('/generate-qr', (req, res) => {
 });
 
 // Endpoint para ligar/desligar o bot de um usuário específico
-app.post('/desligar-bot', (req, res) => {
+app.post('/desligar-bot', express.json(), (req, res) => { // Express JSON middleware adicionado
     const { numero } = req.body;
 
     if (!numero) {
@@ -162,7 +162,7 @@ app.post('/desligar-bot', (req, res) => {
     res.json({ message: `Bot desligado para o número ${numero}.` });
 });
 
-app.post('/ligar-bot', (req, res) => {
+app.post('/ligar-bot', express.json(), (req, res) => { // Express JSON middleware adicionado
     const { numero } = req.body;
 
     if (!numero) {
