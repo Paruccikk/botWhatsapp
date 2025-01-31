@@ -14,6 +14,10 @@ const PORT = process.env.PORT || 3000;
  // Serve todos os arquivos da pasta botWhatsapp
 app.use(express.static(path.join(__dirname))); // Serve todos os arquivos da pasta botWhatsapp
 
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
+
 
 // Rota principal servindo index.html
 app.get("/", (req, res) => {
