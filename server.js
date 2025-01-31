@@ -11,8 +11,9 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Servir arquivos estáticos diretamente da raiz do projeto
+ // Serve todos os arquivos da pasta botWhatsapp
 app.use(express.static(path.join(__dirname))); // Serve todos os arquivos da pasta botWhatsapp
+
 
 // Rota principal servindo index.html
 app.get("/", (req, res) => {
