@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Ativar Bot</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="index.html">BOT IA</a>
+            <div class="mobile-menu">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Início</a></li>
+                <li><a href="contato.html">Contato</a></li>
+                <li><a href="admin.html">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <br><br><br>
+    <h1 class="page-title">Ativar o Bot do WhatsApp</h1>
+
+    <div id="dashboard">
+        <p id="empresaInfo"></p>
+        <p id="expirationTime"></p>
+    </div>
+
+    <form id="activationForm">
+        <label for="accessKey">Digite sua chave de acesso:</label>
+        <input type="text" id="accessKey" name="accessKey" required>
+
+        <label for="phoneNumber">Digite seu número de telefone:</label>
+        <input type="text" id="phoneNumber" name="phoneNumber" required>
+
+        <button type="submit">Ativar BOT</button>
+    </form>
+
+    <br>
+    <!-- Botão de ligar/desligar bot -->
+    <div id="botControlSection">
+        <button id="toggleBotButton" style="background-color: red;">Desligar Bot</button>
+    </div>
+
+    <div id="qrCodeSection" style="display: none;">
+        <h2>Escaneie o QR Code para ativar o bot:</h2>
+        <img id="qrCodeImage" src="" alt="QR Code">
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <div class="content">
+                <div class="footer-top">
+                    <div class="footer-contact">
+                        <br><br>
+                        <p> IA WhatsApp </p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>⚡ Desenvolvido por Daniel Parucci | 2024 - 2025</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script separado para funcionalidades da página -->
+    <script src="bot.js"></script>
+</body>
+</html>

@@ -1,9 +1,11 @@
 {
-    "5511996712153": {
-      "password": "Soso@2578",
-      "accessKey": "051d6149ab05bfd183479dfd361e6618",
-      "expiresAt": "2025-03-03T00:00:00.000Z",
+    "5511934590213": {
+      "password": "minhaSenha123",
       "empresa": "Parucci"
+    },
+    "5511987654321": {
+      "password": "outraSenha456",
+      "empresa": "Outra Empresa"
     }
   }
   
