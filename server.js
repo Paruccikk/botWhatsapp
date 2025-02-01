@@ -57,21 +57,27 @@ app.post('/cadastrar-usuario', (req, res) => {
 });
 
 // 🟢 Login
-app.post('/login', (req, res) => {
-    const { numero, senha } = req.body;
+app.post("/login", express.json(), (req, res) => {
+    const { phoneNumber, password } = req.body;
 
-    if (!numero || !senha) {
-        return res.status(400).json({ error: 'Número e senha são obrigatórios.' });
+    if (!phoneNumber || !password) {
+        return res.status(400).json({ error: "Número de telefone e senha são obrigatórios." });
     }
 
-    const users = loadUsers();
+    const users = loadKeys(); // Carregar os usuários do keys.json
 
-    if (!users[numero] || users[numero].password !== senha) {
-        return res.status(401).json({ error: 'Credenciais inválidas.' });
+    if (!users[phoneNumber]) {
+        return res.status(401).json({ error: "Usuário não encontrado." });
     }
 
-    res.json({ message: 'Login realizado com sucesso!', userData: users[numero] });
+    // Verifica se a senha está correta
+    if (users[phoneNumber].password !== password) {
+        return res.status(401).json({ error: "Senha incorreta." });
+    }
+
+    res.json({ message: "Login bem-sucedido!", phoneNumber });
 });
+
 
 // 🟢 Gerar Resposta da IA
 app.post('/perguntar-ia', async (req, res) => {
