@@ -18,7 +18,7 @@ const carregarUsuarios = () => {
         return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
     } catch (error) {
         console.error("Erro ao carregar os usuários:", error);
-        return {};
+        return {}; // Retorna um objeto vazio caso haja erro ao carregar
     }
 };
 
@@ -90,8 +90,10 @@ app.get('/generate-qr', (req, res) => {
     }
 });
 
-// Rotas de login e cadastro
+// Rota de login
 app.post("/login", login);
+
+// Rota para cadastro de novo usuário
 app.post("/cadastrar-usuario", cadastrarUsuario);
 
 // Rota para interação com o bot
@@ -109,6 +111,10 @@ app.get("/get-usuarios", (req, res) => {
 // Validação de chave de acesso
 app.get('/validate-key', (req, res) => {
     const { accessKey, phoneNumber } = req.query;
+
+    if (!accessKey || !phoneNumber) {
+        return res.status(400).json({ isValid: false, error: 'Parâmetros ausentes (accessKey ou phoneNumber)' });
+    }
 
     const users = carregarUsuarios();
     const user = users[phoneNumber];
