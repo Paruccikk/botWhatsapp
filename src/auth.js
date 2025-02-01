@@ -33,9 +33,9 @@ const login = (req, res) => {
         return res.status(401).json({ error: "Senha incorreta." });
     }
 
-    // Se tudo estiver correto, retorna os dados do usuário
     res.json({ message: "Login bem-sucedido!", empresa: users[phoneNumber].empresa });
 };
+
 
 // Função de cadastro de novo usuário
 const cadastrarUsuario = (req, res) => {
