@@ -1,66 +1,104 @@
 document.addEventListener("DOMContentLoaded", async function() {
-    // Aqui você faria a requisição para obter os dados do usuário logado
-    const phoneNumber = localStorage.getItem("phoneNumber");  // Exemplo usando localStorage para recuperar o telefone do usuário logado
-    
+    // Função de login
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const password = document.getElementById('password').value;
+
+            const loginData = { phoneNumber, password };
+
+            try {
+                const response = await fetch('https://botwhatsapp-oxct.onrender.com/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(result.message);  // Login bem-sucedido
+                    localStorage.setItem("phoneNumber", phoneNumber); // Salva o número do telefone
+                    window.location.href = "index.html"; // Redireciona para a página principal
+                } else {
+                    alert(result.error);  // Se houver erro, mostrar a mensagem
+                }
+            } catch (error) {
+                console.error("Erro de login:", error);
+                alert("Ocorreu um erro ao tentar fazer login.");
+            }
+        });
+    }
+
+    // Lógica de exibição de dados do usuário após login
+    const phoneNumber = localStorage.getItem("phoneNumber");
+
     if (!phoneNumber) {
         alert("Usuário não está logado.");
         window.location.href = "login.html"; // Redireciona para o login se não estiver logado
         return;
     }
 
-    const response = await fetch(`/usuario/${phoneNumber}`);
-    const userData = await response.json();
-
-    if (!response.ok) {
-        alert("Erro ao carregar dados do usuário.");
-        return;
-    }
-
-    // Exibindo as informações da empresa e a validade da chave
-    document.getElementById('empresaName').textContent = userData.empresa;
-    updateActivationStatus(userData);
-
-    // Função para ativar o bot e gerar o QR code
-    document.getElementById('activationForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const accessKey = document.getElementById('accessKey').value;
-        const phoneNumber = document.getElementById('phoneNumber').value;
-
-        const isKeyValid = await validateAccessKey(accessKey, phoneNumber);
-
-        if (isKeyValid) {
-            // Chave válida, agora exibe o QR code
-            const qrResponse = await fetch('https://botwhatsapp-oxct.onrender.com/generate-qr');
-            const qrData = await qrResponse.json();
-
-            document.getElementById('qrCodeSection').style.display = 'block';
-            document.getElementById('qrCodeImage').src = qrData.qrCodeUrl;
-        } else {
-            alert("Chave inválida ou expirada! Entre em contato com o administrador.");
+    try {
+        const response = await fetch(`https://botwhatsapp-oxct.onrender.com/usuario/${phoneNumber}`);
+        
+        if (!response.ok) {
+            throw new Error("Erro ao carregar dados do usuário: " + response.statusText);
         }
-    });
 
-    // Função para alternar o status do bot (ligar/desligar)
-    document.getElementById('toggleBotButton').addEventListener('click', async function() {
-        const botStatus = await getBotStatus(phoneNumber);
+        const userData = await response.json();
 
-        const action = botStatus === 'ativo' ? 'desligar-bot' : 'ligar-bot';
+        document.getElementById('empresaName').textContent = userData.empresa;
+        updateActivationStatus(userData);
 
-        const response = await fetch(`https://botwhatsapp-oxct.onrender.com/${action}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ numero: phoneNumber })
+        // Função para ativar o bot e gerar o QR code
+        document.getElementById('activationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const accessKey = document.getElementById('accessKey').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            const isKeyValid = await validateAccessKey(accessKey, phoneNumber);
+
+            if (isKeyValid) {
+                const qrResponse = await fetch('https://botwhatsapp-oxct.onrender.com/generate-qr');
+                const qrData = await qrResponse.json();
+                document.getElementById('qrCodeSection').style.display = 'block';
+                document.getElementById('qrCodeImage').src = qrData.qrCodeUrl;
+            } else {
+                alert("Chave inválida ou expirada! Entre em contato com o administrador.");
+            }
         });
 
-        if (response.ok) {
-            const newStatus = action === 'desligar-bot' ? 'desligado' : 'ativo';
-            document.getElementById('toggleBotButton').style.backgroundColor = newStatus === 'ativo' ? 'green' : 'red';
-            document.getElementById('toggleBotButton').textContent = newStatus === 'ativo' ? 'Desligar Bot' : 'Ligar Bot';
-        } else {
-            alert("Erro ao atualizar o estado do bot. Tente novamente mais tarde.");
-        }
-    });
+        // Alternar o estado do bot (ligar/desligar)
+        document.getElementById('toggleBotButton').addEventListener('click', async function() {
+            const botStatus = await getBotStatus(phoneNumber);
+
+            const action = botStatus === 'ativo' ? 'desligar-bot' : 'ligar-bot';
+
+            const response = await fetch(`https://botwhatsapp-oxct.onrender.com/${action}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numero: phoneNumber })
+            });
+
+            if (response.ok) {
+                const newStatus = action === 'desligar-bot' ? 'desligado' : 'ativo';
+                document.getElementById('toggleBotButton').style.backgroundColor = newStatus === 'ativo' ? 'green' : 'red';
+                document.getElementById('toggleBotButton').textContent = newStatus === 'ativo' ? 'Desligar Bot' : 'Ligar Bot';
+            } else {
+                alert("Erro ao atualizar o estado do bot. Tente novamente mais tarde.");
+            }
+        });
+    } catch (error) {
+        console.error("Erro ao obter dados do usuário:", error);
+        alert("Ocorreu um erro ao carregar os dados do usuário. " + error.message);
+    }
 });
 
 // Função para validar a chave de acesso
