@@ -1,58 +1,25 @@
 document.addEventListener("DOMContentLoaded", async function() {
-    // Função de login
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            const password = document.getElementById('password').value;
-
-            const loginData = { phoneNumber, password };
-
-            try {
-                const response = await fetch('https://botwhatsapp-oxct.onrender.com/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(loginData)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert(result.message);  // Login bem-sucedido
-                    localStorage.setItem("phoneNumber", phoneNumber); // Salva o número do telefone
-                    window.location.href = "index.html"; // Redireciona para a página principal
-                } else {
-                    alert(result.error);  // Se houver erro, mostrar a mensagem
-                }
-            } catch (error) {
-                console.error("Erro de login:", error);
-                alert("Ocorreu um erro ao tentar fazer login.");
-            }
-        });
-    }
-
-    // Lógica de exibição de dados do usuário após login
-    const phoneNumber = localStorage.getItem("phoneNumber");
-
+    // Verifica se o usuário está logado usando o localStorage
+    const phoneNumber = localStorage.getItem("phoneNumber");  // Recupera o telefone do usuário logado
+    
     if (!phoneNumber) {
+        // Caso o usuário não esteja logado, redireciona para o login
         alert("Usuário não está logado.");
-        window.location.href = "login.html"; // Redireciona para o login se não estiver logado
+        window.location.href = "login.html"; // Redireciona para a tela de login
         return;
     }
 
+    // Requisição para obter os dados do usuário logado
     try {
-        const response = await fetch(`https://botwhatsapp-oxct.onrender.com/usuario/${phoneNumber}`);
+        const response = await fetch(`/usuario/${phoneNumber}`);
         
         if (!response.ok) {
-            throw new Error("Erro ao carregar dados do usuário: " + response.statusText);
+            throw new Error('Erro ao carregar dados do usuário.');
         }
-
+        
         const userData = await response.json();
-
+        
+        // Exibe as informações do usuário
         document.getElementById('empresaName').textContent = userData.empresa;
         updateActivationStatus(userData);
 
@@ -61,13 +28,14 @@ document.addEventListener("DOMContentLoaded", async function() {
             event.preventDefault();
 
             const accessKey = document.getElementById('accessKey').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
 
             const isKeyValid = await validateAccessKey(accessKey, phoneNumber);
 
             if (isKeyValid) {
+                // Chave válida, agora exibe o QR code
                 const qrResponse = await fetch('https://botwhatsapp-oxct.onrender.com/generate-qr');
                 const qrData = await qrResponse.json();
+
                 document.getElementById('qrCodeSection').style.display = 'block';
                 document.getElementById('qrCodeImage').src = qrData.qrCodeUrl;
             } else {
@@ -75,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             }
         });
 
-        // Alternar o estado do bot (ligar/desligar)
+        // Função para alternar o status do bot (ligar/desligar)
         document.getElementById('toggleBotButton').addEventListener('click', async function() {
             const botStatus = await getBotStatus(phoneNumber);
 
@@ -95,9 +63,10 @@ document.addEventListener("DOMContentLoaded", async function() {
                 alert("Erro ao atualizar o estado do bot. Tente novamente mais tarde.");
             }
         });
+
     } catch (error) {
         console.error("Erro ao obter dados do usuário:", error);
-        alert("Ocorreu um erro ao carregar os dados do usuário. " + error.message);
+        alert(error.message || "Ocorreu um erro inesperado.");
     }
 });
 
@@ -130,3 +99,34 @@ function updateActivationStatus(userData) {
         document.getElementById('expirationTime').textContent = `Tempo restante: ${daysRemaining} dias`;
     }
 }
+
+// Função para o login
+document.getElementById('login-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    const password = document.getElementById('password').value;
+
+    const loginData = { phoneNumber, password };
+
+    try {
+        const response = await fetch('https://botwhatsapp-oxct.onrender.com/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(loginData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message);  // Login bem-sucedido
+            localStorage.setItem("phoneNumber", phoneNumber);  // Salva o telefone no localStorage
+            window.location.href = "index.html"; // Redireciona para o index.html após o login
+        } else {
+            alert(result.error);  // Exibe mensagem de erro se não for bem-sucedido
+        }
+    } catch (error) {
+        console.error("Erro ao tentar fazer login:", error);
+        alert("Ocorreu um erro ao tentar fazer login.");
+    }
+});
