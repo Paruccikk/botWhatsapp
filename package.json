@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "main/server/server.js",
   "scripts": {
-    "start": "node botWhatsapp/server/server.js"
+    "start": "node server/server.js"
   },
   "dependencies": {
     "express": "^4.17.1",
