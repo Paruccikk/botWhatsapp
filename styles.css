@@ -79,24 +79,6 @@ form button:active {
   background-color: #2a5f8c;
 }
 
-/* Estilo do QR Code */
-#qrCodeSection {
-  margin-top: 2rem;
-  display: none;
-}
-
-#qrCodeSection h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-#qrCodeImage {
-  max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-
 /* Estilo para o cabeçalho */
 header {
   background-color: #a7a3a3;
@@ -212,58 +194,4 @@ nav {
 
 .mobile-menu.active .line3 {
   transform: rotate(45deg) translate(-5px, -6px);
-}
-
-/* Estilo geral para botões */
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-/* Botão "Desligar Bot" */
-button.btn-desligar-bot {
-  background-color: #f44336; /* Cor vermelha para representar "desligar" */
-  color: white;
-  font-weight: bold;
-}
-
-/* Efeito de hover para o botão */
-button.btn-desligar-bot:hover {
-  background-color: #d32f2f; /* Cor mais escura no hover */
-  transform: scale(1.1); /* Aumenta ligeiramente o botão */
-}
-
-/* Efeito de clique para dar feedback visual */
-button.btn-desligar-bot:active {
-  transform: scale(0.98); /* Quando o botão é pressionado */
-}
-
-/* Estilo de foco para acessibilidade */
-button:focus {
-  outline: none;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
-/* Adicionando um pouco mais de margem para espaçamento visual */
-button {
-  margin-top: 10px;
-}
-
-
-input[type="date"] {
-  appearance: none;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  padding: 8px;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  filter: invert(0.5);
 }

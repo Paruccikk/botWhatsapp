@@ -1,42 +1,54 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css"> <!-- Arquivo CSS externo -->
 </head>
 <body>
-    <h2>Cadastro de Usuário</h2>
-    <form id="cadastroForm">
-        <input type="text" id="numero" placeholder="Número de telefone" required>
-        <input type="password" id="senha" placeholder="Senha" required>
-        <input type="text" id="empresa" placeholder="Nome da Empresa" required>
-        <button type="submit">Cadastrar</button>
-    </form>
+    <header>
+        <nav>
+            <a href="#" class="logo">Logo Empresa</a>
+            <div class="mobile-menu">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Página Inicial</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="page-title">Cadastro</h1>
+        <form>
+            <label for="numero">Número</label>
+            <input type="text" id="numero" placeholder="📞 Insira seu número" required>
+
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="🔑 Insira sua senha" required>
+
+            <label for="empresa">Empresa</label>
+            <input type="text" id="empresa" placeholder="🏢 Nome da sua empresa" required>
+
+            <button type="submit">Cadastrar</button>
+        </form>
+    </main>
+
+    <footer>
+        <center><p>© 2025 Logo Empresa</p></center>
+    </footer>
 
     <script>
-        document.getElementById("cadastroForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const navList = document.querySelector('.nav-list');
 
-            const numero = document.getElementById("numero").value;
-            const senha = document.getElementById("senha").value;
-            const empresa = document.getElementById("empresa").value;
-
-            const response = await fetch("/cadastrar-usuario", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ numero, senha, empresa })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                alert("Usuário cadastrado com sucesso!");
-                window.location.href = "login.html";
-            } else {
-                alert("Erro: " + data.error);
-            }
+        mobileMenu.addEventListener('click', () => {
+            navList.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
         });
     </script>
 </body>

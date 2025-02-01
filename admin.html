@@ -14,8 +14,7 @@
     </header>
 
     <div class="container">
-
-                <h2>👤 Cadastrar Novo Usuário</h2>
+        <h2>👤 Cadastrar Novo Usuário</h2>
         <form id="form-cadastrar">
             <input type="text" id="numero-cadastro" placeholder="📞 Número com DDD" required>
             <input type="password" id="senha-cadastro" placeholder="🔑 Senha" required>
@@ -23,30 +22,21 @@
             <button type="submit">➕ Cadastrar</button>
         </form>
 
-
-        <h2>♻️ Renovar Chave de Acesso</h2>
-        <form id="form-renovar">
-            <input type="text" id="numero-renovar" placeholder="🔑 Número de Telefone" required>
-            <button type="submit">🔄 Renovar</button>
-        </form>
-
-        <center><br><button class="btn-desligar-bot" onclick="desligarBot('${numero}')">⚡ Desligar Bot</button></center>
-
         <h2>📋 Lista de Usuários Registrados</h2>
-            <table id="usersTable">
-                <thead>
-                    <tr>
-                        <th>📞 Número</th>
-                        <th>🏢 Empresa</th>
-                        <th>🔑 Chave de Acesso</th>
-                        <th>📅 Expiração</th>
-                        <th>⚙️ Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Usuários serão carregados aqui -->
-                </tbody>
-            </table>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>📞 Número</th>
+                    <th>🏢 Empresa</th>
+                    <th>🔑 Chave de Acesso</th>
+                    <th>📅 Expiração</th>
+                    <th>⚙️ Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Usuários serão carregados aqui -->
+            </tbody>
+        </table>
     </div>
 
     <footer>
@@ -55,113 +45,70 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const tabelaChaves = document.getElementById("keysTable").getElementsByTagName("tbody")[0];
             const formCadastrar = document.getElementById("form-cadastrar");
-    
-            async function carregarChaves() {
+            const tabelaUsuarios = document.getElementById("usersTable").getElementsByTagName("tbody")[0];
+
+            // Função para exibir todos os usuários cadastrados
+            async function carregarUsuarios() {
                 try {
-                    const response = await fetch("https://botwhatsapp-oxct.onrender.com/get-keys");
-                    
+                    const response = await fetch("/get-usuarios");
+
                     if (!response.ok) {
                         throw new Error(`Erro ${response.status}: ${response.statusText}`);
                     }
-    
-                    const text = await response.text(); // Obtém o texto bruto da resposta
-                    if (!text) {
-                        throw new Error("Resposta do servidor está vazia.");
-                    }
-    
-                    const keys = JSON.parse(text); // Converte para JSON
-    
-                    tabelaChaves.innerHTML = "";
-                    Object.keys(keys).forEach(numero => {
-                        const keyData = keys[numero];
-                        const row = tabelaChaves.insertRow();
+
+                    const usuarios = await response.json();
+
+                    tabelaUsuarios.innerHTML = ""; // Limpar tabela antes de adicionar os dados
+
+                    Object.keys(usuarios).forEach(numero => {
+                        const userData = usuarios[numero];
+                        const row = tabelaUsuarios.insertRow();
+
                         row.insertCell(0).textContent = numero;
-                        row.insertCell(1).textContent = keyData.accessKey;
-                        row.insertCell(2).textContent = keyData.expiresAt;
-                        row.insertCell(3).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${numero}')">🔄 Renovar</button>`;
+                        row.insertCell(1).textContent = userData.empresa;
+                        row.insertCell(2).textContent = userData.accessKey;
+                        row.insertCell(3).textContent = formatarData(userData.expiresAt);
+                        row.insertCell(4).innerHTML = `
+                            <button class="btn-renovar" onclick="renovarChave('${numero}')">🔄 Renovar</button>
+                        `;
                     });
                 } catch (error) {
-                    console.error("Erro ao carregar chaves:", error);
+                    console.error("Erro ao carregar usuários:", error);
                     alert(error.message);
                 }
             }
-    
-            // Função para renovar a chave de um usuário
-            async function renovarChave(numero) {
-                try {
-                    const response = await fetch("https://botwhatsapp-oxct.onrender.com/renovar-chave", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ numero })
-                    });
-    
-                    const data = await response.json();
-                    if (response.ok) {
-                        alert(data.message);
-                        carregarChaves(); // Atualiza a lista de chaves
-                    } else {
-                        alert("Erro ao renovar chave: " + data.error);
-                    }
-                } catch (error) {
-                    alert("Erro ao renovar chave: " + error.message);
-                }
-            }
-                // Função desligarBot
-            async function desligarBot(numero) {
-                const response = await fetch('/desligar-bot', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ numero })
-                });
 
-                const data = await response.json();
-                alert(data.message || "Erro ao desligar o bot.");
+            // Função de formatação de data
+            function formatarData(isoString) {
+                if (!isoString) return "Data inválida";
+
+                const data = new Date(isoString);
+                const dia = String(data.getDate()).padStart(2, "0");
+                const mes = String(data.getMonth() + 1).padStart(2, "0");
+                const ano = data.getFullYear();
+
+                return `${dia}-${mes}-${ano}`;
             }
 
-            async function ligarBot(numero) {
-                const response = await fetch('/ligar-bot', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ numero })
-                });
-
-                const data = await response.json();
-                alert(data.message || "Erro ao ligar o bot.");
-            }
-
-
-                function formatarData(isoString) {
-                    if (!isoString) return "Data inválida";
-                    
-                    const data = new Date(isoString);
-                    const dia = String(data.getDate()).padStart(2, "0");
-                    const mes = String(data.getMonth() + 1).padStart(2, "0"); // Mês começa do 0
-                    const ano = data.getFullYear();
-                    
-                    return `${dia}-${mes}-${ano}`;
-                }
-
-
-    
-            // Cadastro de novo usuário
+            // Formulário de cadastro de usuário
             formCadastrar.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 const numero = document.getElementById("numero-cadastro").value;
-                const chave = document.getElementById("chave-cadastro").value;
-    
+                const senha = document.getElementById("senha-cadastro").value;
+                const empresa = document.getElementById("empresa-cadastro").value;
+
                 try {
-                    const response = await fetch("https://botwhatsapp-oxct.onrender.com/cadastrar-usuario", {
+                    const response = await fetch("/cadastrar-usuario", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ numero, chave })
+                        body: JSON.stringify({ numero, senha, empresa })
                     });
-    
+
                     const data = await response.json();
                     if (response.ok) {
-                        alert(data.message);
-                        carregarChaves(); // Atualiza a lista de chaves
+                        alert(`Usuário cadastrado com sucesso! Chave de Acesso: ${data.accessKey}`);
+                        carregarUsuarios(); // Atualiza a lista
                     } else {
                         alert("Erro ao cadastrar usuário: " + data.error);
                     }
@@ -169,10 +116,10 @@
                     alert("Erro ao cadastrar usuário: " + error.message);
                 }
             });
-    
-            carregarChaves();
+
+            // Chamar a função ao carregar a página
+            carregarUsuarios();
         });
     </script>
-    
 </body>
 </html>
