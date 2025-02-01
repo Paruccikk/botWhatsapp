@@ -47,6 +47,55 @@ app.post("/login", (req, res) => {
     res.json({ message: "Login bem-sucedido!", empresa: users[phoneNumber].empresa });
 });
 
+// 🟢 Cadastro de Usuário
+app.post('/cadastrar-usuario', (req, res) => {
+    const { numero, senha, empresa } = req.body;
+
+    if (!numero || !senha || !empresa) {
+        return res.status(400).json({ error: 'Número, senha e empresa são obrigatórios.' });
+    }
+
+    const users = loadUsers(); // Agora carrega do usuarios.json
+
+    if (users[numero]) {
+        return res.status(400).json({ error: 'Número já cadastrado.' });
+    }
+
+    users[numero] = {
+        password: senha,
+        empresa
+    };
+
+    saveUsers(users);
+    res.status(200).json({ message: 'Usuário cadastrado com sucesso!' });
+});
+
+app.post('/renovar-chave', (req, res) => {
+    const { numero } = req.body;
+
+    if (!numero) {
+        return res.status(400).json({ error: 'Número de telefone é obrigatório.' });
+    }
+
+    const keys = loadKeys();
+
+    if (!keys[numero]) {
+        return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    // Gera nova chave e define validade de 30 dias
+    const newAccessKey = crypto.randomBytes(16).toString('hex');
+    const newExpiresAt = new Date();
+    newExpiresAt.setDate(newExpiresAt.getDate() + 30);
+
+    keys[numero] = { accessKey: newAccessKey, expiresAt: newExpiresAt.toISOString() };
+    saveKeys(keys);
+
+    res.json({ message: 'Chave renovada com sucesso!', accessKey: newAccessKey });
+});
+
+
+
 // Serve todos os arquivos estáticos
 app.use(express.static(__dirname));
 

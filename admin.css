@@ -107,3 +107,18 @@ th {
 .btn-renovar:hover {
     background-color: #218838;
 }
+
+
+input[type="date"] {
+    appearance: none;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.5);
+}

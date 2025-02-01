@@ -104,6 +104,42 @@
                     alert("Erro ao renovar chave: " + error.message);
                 }
             }
+                // Função desligarBot
+            async function desligarBot(numero) {
+                const response = await fetch('/desligar-bot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numero })
+                });
+
+                const data = await response.json();
+                alert(data.message || "Erro ao desligar o bot.");
+            }
+
+            async function ligarBot(numero) {
+                const response = await fetch('/ligar-bot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numero })
+                });
+
+                const data = await response.json();
+                alert(data.message || "Erro ao ligar o bot.");
+            }
+
+
+                function formatarData(isoString) {
+                    if (!isoString) return "Data inválida";
+                    
+                    const data = new Date(isoString);
+                    const dia = String(data.getDate()).padStart(2, "0");
+                    const mes = String(data.getMonth() + 1).padStart(2, "0"); // Mês começa do 0
+                    const ano = data.getFullYear();
+                    
+                    return `${dia}-${mes}-${ano}`;
+                }
+
+
     
             // Cadastro de novo usuário
             formCadastrar.addEventListener("submit", async (e) => {
