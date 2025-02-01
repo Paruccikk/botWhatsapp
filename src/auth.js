@@ -1,13 +1,10 @@
 const fs = require('fs');
 const crypto = require('crypto');
 
-
 // Função para salvar usuários no arquivo
 const saveUsers = (users) => {
     fs.writeFileSync('usuarios.json', JSON.stringify(users, null, 2), 'utf8');
 };
-
-const fs = require('fs');
 
 // Função para carregar usuários do arquivo
 const loadUsers = () => {
@@ -15,7 +12,7 @@ const loadUsers = () => {
         return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
     } catch (error) {
         console.error("Erro ao carregar os usuários:", error);
-        return {};
+        return {}; // Retorna um objeto vazio se houver erro
     }
 };
 
@@ -39,10 +36,6 @@ const login = (req, res) => {
 
     res.json({ message: "Login bem-sucedido!", empresa: users[phoneNumber].empresa });
 };
-
-// Exporte as funções corretamente
-module.exports = { login, cadastrarUsuario };
-
 
 // Função de cadastro de novo usuário
 const cadastrarUsuario = (req, res) => {
@@ -74,4 +67,5 @@ const cadastrarUsuario = (req, res) => {
     res.status(200).json({ message: "Usuário cadastrado com sucesso!", accessKey });
 };
 
+// Exporte as funções corretamente
 module.exports = { login, cadastrarUsuario };
