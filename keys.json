@@ -1,13 +1,14 @@
 {
     "5511934590213": {
+      "password": "senhaSegura123",
       "accessKey": "e6014199a26eece3afbd666782af1b7b",
-      "password": "minhaSenha123",
-      "expiresAt": "2025-01-02T02:46:02.760Z"
-    },
-    "5511987654321": {
-      "accessKey": "novaChave123",
-      "password": "outraSenha456",
-      "expiresAt": "2025-03-02T02:45:43.014Z"
+      "expiresAt": "2025-03-03T02:46:02.760Z",
+      "empresa": {
+        "nome": "Parucci",
+        "horario_funcionamento": "18:00 às 06:00",
+        "endereco": "Rua das Orquídeas, 123, São Paulo",
+        "telefone": "(11) 98765-4321",
+        "servicos": "Consultoria empresarial, planejamento estratégico e suporte administrativo."
+      }
     }
   }
-  
