@@ -23,6 +23,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
         if (response.ok) {
             alert(result.message);  // Login bem-sucedido
             // Redirecionar ou fazer algo com o resultado
+            window.location.href = "/index.html"; // Ao invés de "/admin"
         } else {
             alert(result.error);  // Se houver erro, mostrar a mensagem
         }
