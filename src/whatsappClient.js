@@ -13,19 +13,19 @@ global.botStartTime = null;  // Armazenar o timestamp quando o bot estiver pront
 
 // Evento para gerar o QR Code
 client.on('qr', (qr) => {
-    console.log("QR Code gerado:", qr);
-    // Se o QR Code ainda não foi gerado, gerar e armazenar
+    console.log("QR Code gerado:", qr);  // Log para verificar se o evento está sendo disparado
     if (!global.qrCodeUrl) {
         qrcode.toDataURL(qr, (err, url) => {
             if (err) {
                 console.error("Erro ao gerar QR Code:", err);
                 return;
             }
-            global.qrCodeUrl = url; // Armazena o QR Code
+            global.qrCodeUrl = url;
             console.log("QR Code gerado com sucesso!");
         });
     }
 });
+
 
 // Evento quando o cliente estiver pronto
 client.on('ready', () => {

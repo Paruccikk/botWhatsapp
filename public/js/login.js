@@ -32,3 +32,32 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
         alert("Ocorreu um erro ao tentar fazer login.");
     }
 });
+
+// Função para exibir mensagem abaixo do botão
+function showMessage(elementId, message, type) {
+    const messageElement = document.getElementById(elementId);
+    messageElement.textContent = message;
+    messageElement.className = 'message'; // Remove qualquer classe anterior
+    messageElement.classList.add(type); // Adiciona 'success' ou 'error'
+}
+
+document.getElementById("login-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const phoneNumber = document.getElementById("phoneNumber").value;
+    const password = document.getElementById("password").value;
+
+    const response = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber, password })
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        showMessage("login-message", data.message, 'success'); // Exibe mensagem de sucesso
+        window.location.href = "/admin"; // Redireciona para a página de admin
+    } else {
+        const error = await response.json();
+        showMessage("login-message", error.error, 'error'); // Exibe mensagem de erro
+    }
+});

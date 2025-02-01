@@ -35,6 +35,7 @@
         <input type="text" id="phoneNumber" name="phoneNumber" required>
         
         <button type="submit">Ativar BOT</button>
+        <div id="activation-message" class="message"></div>
     </form>
 
     <br>
@@ -58,6 +59,7 @@
     </form>
 
     <script>
+        
         
                 // Função para ativar o bot ao submeter a chave de acesso
                 document.getElementById('activationForm').addEventListener('submit', async function(event) {

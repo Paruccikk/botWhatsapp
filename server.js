@@ -40,11 +40,12 @@ const loadUsers = () => {
 // Rota para gerar o QR Code
 app.get('/generate-qr', (req, res) => {
     if (global.qrCodeUrl) {
-        res.json({ qrCodeUrl: global.qrCodeUrl }); // Retorna o QR Code gerado
+        res.json({ qrCodeUrl: global.qrCodeUrl });  // Retorna a URL do QR Code gerado
     } else {
-        res.status(404).json({ error: 'QR Code não gerado ainda.' }); // Caso o QR Code não tenha sido gerado
+        res.status(404).json({ error: "QR Code não gerado ainda." });  // Retorna erro se o QR Code ainda não foi gerado
     }
 });
+
 
 
 // Salvar dados dos usuários no arquivo JSON
