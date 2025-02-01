@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
-const crypto = require('crypto');
+const crypto = require('crypto');  // ⬅️ IMPORTAÇÃO CORRETA
 const path = require('path');
 const { obterRespostaIA } = require('./aiService'); // Importa IA
 require('dotenv').config();
@@ -47,7 +47,8 @@ app.post("/login", (req, res) => {
     res.json({ message: "Login bem-sucedido!", empresa: users[phoneNumber].empresa });
 });
 
-const crypto = require("crypto");
+// 🔹 REMOVA ESTA LINHA DUPLICADA!!
+// const crypto = require("crypto");  <-- ❌ APAGUE ESSA LINHA DUPLICADA!
 
 // Cadastro de novo usuário
 app.post("/cadastrar-usuario", (req, res) => {
@@ -82,13 +83,11 @@ app.post("/cadastrar-usuario", (req, res) => {
     res.status(200).json({ message: "Usuário cadastrado com sucesso!", accessKey });
 });
 
-
 // Rota para obter a lista de usuários cadastrados
 app.get("/get-usuarios", (req, res) => {
     const users = loadUsers();
     res.json(users);
 });
-
 
 // Serve todos os arquivos estáticos
 app.use(express.static(__dirname));
