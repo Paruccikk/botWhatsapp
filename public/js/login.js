@@ -41,17 +41,6 @@ function showMessage(elementId, message, type) {
     messageElement.classList.add(type); // Adiciona 'success' ou 'error'
 }
 
-document.getElementById("login-form").addEventListener("submit", async function(event) {
-    event.preventDefault();
-    const phoneNumber = document.getElementById("phoneNumber").value;
-    const password = document.getElementById("password").value;
-
-    const response = await fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber, password })
-    });
-
     if (response.ok) {
         const data = await response.json();
         showMessage("login-message", data.message, 'success'); // Exibe mensagem de sucesso
