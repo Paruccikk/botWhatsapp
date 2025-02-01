@@ -28,33 +28,10 @@ client.on('qr', (qr) => {
 });
 
 // Evento quando o cliente estiver pronto
-// Evento quando o cliente estiver pronto
 client.on('ready', () => {
     console.log("✅ Cliente WhatsApp conectado com sucesso!");
     global.botStartTime = new Date().getTime(); // Salva o timestamp quando o bot estiver pronto
 });
-
-// 📩 Evento para lidar com mensagens recebidas
-client.on('message', async (message) => {
-    console.log(`📩 Mensagem recebida de ${message.from}: ${message.body}`);
-
-    // Verifica se a mensagem NÃO vem de um grupo e se foi recebida após o bot ter iniciado
-    if (!message.from.includes("@g.us") && message.timestamp * 1000 > global.botStartTime) {
-        try {
-            // Obtém resposta da IA simulada (ou do DeepSeek quando for implementado)
-            const resposta = await obterRespostaIA(message.body, message._data.notifyName);
-
-            // Envia a resposta para o usuário
-            await client.sendMessage(message.from, resposta);
-            console.log(`✅ Resposta enviada para ${message.from}: ${resposta}`);
-        } catch (error) {
-            console.error("❌ Erro ao processar a mensagem:", error);
-        }
-    } else {
-        console.log("📩 Ignorando mensagem anterior ao início do bot.");
-    }
-});
-
 
 // Inicializa o cliente do WhatsApp
 client.initialize().catch(error => {
