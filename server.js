@@ -1,13 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 require('dotenv').config();
-const fs = require('fs');  // Importando o módulo fs
-
-// Importações corrigidas
-const { login, cadastrarUsuario } = require('./src/auth');  // Verifique se o caminho está correto
-const { interagirComBot } = require('./src/botService');  
-const client = require('./src/whatsappClient');  // Importando o WhatsApp Client
 
 const app = express();
 app.use(express.json());
@@ -15,9 +11,6 @@ app.use(cors());
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
-
-// Serve arquivos estáticos (como index.html, admin.html) da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Função para carregar usuários do arquivo
 const carregarUsuarios = () => {
@@ -27,6 +20,62 @@ const carregarUsuarios = () => {
         console.error("Erro ao carregar os usuários:", error);
         return {};
     }
+};
+
+// Função para salvar usuários no arquivo
+const salvarUsuarios = (users) => {
+    fs.writeFileSync('usuarios.json', JSON.stringify(users, null, 2), 'utf8');
+};
+
+// Função de login
+const login = (req, res) => {
+    const { phoneNumber, password } = req.body;
+
+    if (!phoneNumber || !password) {
+        return res.status(400).json({ error: "Número de telefone e senha são obrigatórios." });
+    }
+
+    const users = carregarUsuarios();
+
+    if (!users[phoneNumber]) {
+        return res.status(401).json({ error: "Usuário não encontrado." });
+    }
+
+    if (users[phoneNumber].password !== password) {
+        return res.status(401).json({ error: "Senha incorreta." });
+    }
+
+    res.json({ message: "Login bem-sucedido!", empresa: users[phoneNumber].empresa });
+};
+
+// Função de cadastro de novo usuário
+const cadastrarUsuario = (req, res) => {
+    const { numero, senha, empresa } = req.body;
+
+    if (!numero || !senha || !empresa) {
+        return res.status(400).json({ error: "Número, senha e empresa são obrigatórios." });
+    }
+
+    const users = carregarUsuarios();
+
+    if (users[numero]) {
+        return res.status(400).json({ error: "Número já cadastrado." });
+    }
+
+    const accessKey = crypto.randomBytes(16).toString("hex");
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    users[numero] = {
+        password: senha,
+        accessKey,
+        expiresAt: expiresAt.toISOString(),
+        empresa
+    };
+
+    salvarUsuarios(users);
+    res.status(200).json({ message: "Usuário cadastrado com sucesso!", accessKey });
 };
 
 // Função auxiliar para gerar chave de acesso
@@ -46,7 +95,10 @@ app.post("/login", login);
 app.post("/cadastrar-usuario", cadastrarUsuario);
 
 // Rota para interação com o bot
-app.post("/interagir-bot", interagirComBot);
+app.post("/interagir-bot", (req, res) => {
+    // Exemplo simples de interação com o bot
+    res.json({ message: "Bot interagindo com sucesso!" });
+});
 
 // Rota para obter a lista de usuários registrados
 app.get("/get-usuarios", (req, res) => {
@@ -79,7 +131,7 @@ app.post("/renovar-chave", (req, res) => {
 
     usuarios[numero].accessKey = gerarChaveAcesso();
     usuarios[numero].expiresAt = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
-    fs.writeFileSync('usuarios.json', JSON.stringify(usuarios, null, 2)); // Salvando a nova chave
+    salvarUsuarios(usuarios);
 
     res.json({ message: "Chave de acesso renovada com sucesso!" });
 });
