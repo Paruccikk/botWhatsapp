@@ -29,6 +29,9 @@ const carregarUsuarios = () => {
     }
 };
 
+// Função auxiliar para gerar chave de acesso
+const gerarChaveAcesso = () => Math.random().toString(36).substring(2, 15);
+
 // Rota para gerar o QR Code
 app.get('/generate-qr', (req, res) => {
     if (global.qrCodeUrl) {
@@ -37,7 +40,6 @@ app.get('/generate-qr', (req, res) => {
         res.status(404).json({ error: "QR Code não gerado ainda." });  // Retorna erro se o QR Code ainda não foi gerado
     }
 });
-
 
 // Rotas de login e cadastro
 app.post("/login", login);
@@ -105,6 +107,3 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
-
-// Função auxiliar para gerar chave de acesso
-const gerarChaveAcesso = () => Math.random().toString(36).substring(2, 15);
