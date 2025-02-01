@@ -1,21 +1,6 @@
 const fs = require('fs');
 const crypto = require('crypto');
 
-// Função para salvar usuários no arquivo
-const saveUsers = (users) => {
-    fs.writeFileSync('usuarios.json', JSON.stringify(users, null, 2), 'utf8');
-};
-
-// Função para carregar usuários do arquivo
-const loadUsers = () => {
-    try {
-        return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
-    } catch (error) {
-        console.error("Erro ao carregar os usuários:", error);
-        return {}; // Retorna um objeto vazio se houver erro
-    }
-};
-
 // Função de login
 const login = (req, res) => {
     const { phoneNumber, password } = req.body;

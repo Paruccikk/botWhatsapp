@@ -2,13 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const fs = require('fs');  // Importando o módulo fs
 
 // Importações corrigidas
-const { login, cadastrarUsuario } = require('./src/auth');  // Verifique se o caminho está correto 
+const { login, cadastrarUsuario } = require('./src/auth');  // Verifique se o caminho está correto
 const { interagirComBot } = require('./src/botService');  
 const client = require('./src/whatsappClient');  // Importando o WhatsApp Client
 
-const app = express();  
+const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.static("public"));
@@ -78,7 +79,7 @@ app.post("/renovar-chave", (req, res) => {
 
     usuarios[numero].accessKey = gerarChaveAcesso();
     usuarios[numero].expiresAt = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
-    fs.writeFileSync('usuarios.json', JSON.stringify(usuarios, null, 2));
+    fs.writeFileSync('usuarios.json', JSON.stringify(usuarios, null, 2)); // Salvando a nova chave
 
     res.json({ message: "Chave de acesso renovada com sucesso!" });
 });
