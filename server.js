@@ -1,21 +1,22 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-app.use(express.static(__dirname));  // Serve arquivos estáticos a partir da raiz
-
-
 // Importando as funções de login, cadastro, e bot
-const { login, cadastrarUsuario } = require('./public/js/auth');
-const { interagirComBot } = require('./botService');
+const { login, cadastrarUsuario } = require('./src/auth'); // Atualizar o caminho para 'src/auth'
+const { interagirComBot } = require('./src/botService');  // Atualizar o caminho para 'src/botService'
 
-const app = express();
+const app = express();  // Inicializa o app aqui
 app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
+
+// Serve os arquivos estáticos (como index.html, admin.html) da pasta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Carregar dados dos usuários a partir do arquivo (exemplo em JSON)
 const carregarUsuarios = () => {
@@ -77,6 +78,7 @@ app.get('/validate-key', (req, res) => {
     }
 });
 
+
 // Função para renovar a chave de acesso
 app.post("/renovar-chave", (req, res) => {
     const { numero } = req.body;
@@ -103,7 +105,6 @@ const gerarChaveAcesso = () => {
 // Rota para ligar/desligar o bot
 app.post('/ligar-bot', (req, res) => {
     // Lógica para ligar o bot
-    // Aqui você pode colocar a lógica de interação com o WhatsApp (por exemplo, ativar um cliente WhatsApp)
     res.json({ message: "Bot ligado com sucesso!" });
 });
 
@@ -113,17 +114,16 @@ app.post('/desligar-bot', (req, res) => {
 });
 
 // Serve os arquivos estáticos (como index.html, admin.html)
-// Ajustar para garantir que arquivos como login.html e admin.html sejam servidos corretamente
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 
 // Rota para admin.html
 app.get("/admin", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "admin.html"));
+    res.sendFile(path.join(__dirname, "public/admin.html"));
 });
 
 // Rota principal para index.html
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 // Iniciando o servidor
