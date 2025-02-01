@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
 
 // Importações corrigidas
@@ -19,15 +18,6 @@ const PORT = process.env.PORT || 3000;
 // Serve arquivos estáticos (como index.html, admin.html) da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Função para carregar usuários do arquivo
-const carregarUsuarios = () => {
-    try {
-        return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
-    } catch (error) {
-        console.error("Erro ao carregar os usuários:", error);
-        return {};
-    }
-};
 
 // Função auxiliar para gerar chave de acesso
 const gerarChaveAcesso = () => Math.random().toString(36).substring(2, 15);
