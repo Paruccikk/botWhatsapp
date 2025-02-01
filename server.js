@@ -1,41 +1,40 @@
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
-const crypto = require('crypto');
+const cors = require('cors');
+const crypto = require('crypto');  // ⬅️ IMPORTAÇÃO CORRETA
+const path = require('path');
+const { obterRespostaIA } = require('./aiService'); // Importa IA
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
 
-// Função para carregar usuários do arquivo
-const carregarUsuarios = () => {
+// Função para carregar usuários do arquivo usuarios.json
+const loadUsers = () => {
     try {
         return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
     } catch (error) {
-        console.error("Erro ao carregar os usuários:", error);
-        return {}; // Retorna um objeto vazio caso haja erro ao carregar
+        return {};
     }
 };
 
-// Função para salvar usuários no arquivo
-const salvarUsuarios = (users) => {
+// Função para salvar usuários no arquivo usuarios.json
+const saveUsers = (users) => {
     fs.writeFileSync('usuarios.json', JSON.stringify(users, null, 2), 'utf8');
 };
 
-// Função de login
-const login = (req, res) => {
+// 🟢 Login atualizado usando usuarios.json
+app.post("/login", (req, res) => {
     const { phoneNumber, password } = req.body;
 
     if (!phoneNumber || !password) {
         return res.status(400).json({ error: "Número de telefone e senha são obrigatórios." });
     }
 
-    const users = carregarUsuarios();
+    const users = loadUsers(); // Carrega os usuários do arquivo usuarios.json
 
     if (!users[phoneNumber]) {
         return res.status(401).json({ error: "Usuário não encontrado." });
@@ -46,27 +45,33 @@ const login = (req, res) => {
     }
 
     res.json({ message: "Login bem-sucedido!", empresa: users[phoneNumber].empresa });
-};
+});
 
-// Função de cadastro de novo usuário
-const cadastrarUsuario = (req, res) => {
+// 🔹 REMOVA ESTA LINHA DUPLICADA!!
+// const crypto = require("crypto");  <-- ❌ APAGUE ESSA LINHA DUPLICADA!
+
+// Cadastro de novo usuário
+app.post("/cadastrar-usuario", (req, res) => {
     const { numero, senha, empresa } = req.body;
 
     if (!numero || !senha || !empresa) {
         return res.status(400).json({ error: "Número, senha e empresa são obrigatórios." });
     }
 
-    const users = carregarUsuarios();
+    const users = loadUsers();
 
     if (users[numero]) {
         return res.status(400).json({ error: "Número já cadastrado." });
     }
 
+    // Gerar uma chave de acesso única
     const accessKey = crypto.randomBytes(16).toString("hex");
 
+    // Definir expiração para 30 dias
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
+    // Adicionar usuário ao banco de dados (usuarios.json)
     users[numero] = {
         password: senha,
         accessKey,
@@ -74,92 +79,67 @@ const cadastrarUsuario = (req, res) => {
         empresa
     };
 
-    salvarUsuarios(users);
+    saveUsers(users);
     res.status(200).json({ message: "Usuário cadastrado com sucesso!", accessKey });
-};
-
-// Função auxiliar para gerar chave de acesso
-const gerarChaveAcesso = () => Math.random().toString(36).substring(2, 15);
-
-// Rota para gerar o QR Code
-app.get('/generate-qr', (req, res) => {
-    if (global.qrCodeUrl) {
-        res.json({ qrCodeUrl: global.qrCodeUrl });  // Retorna a URL do QR Code gerado
-    } else {
-        res.status(404).json({ error: "QR Code não gerado ainda." });  // Retorna erro se o QR Code ainda não foi gerado
-    }
 });
 
-// Rota de login
-app.post("/login", login);
-
-// Rota para cadastro de novo usuário
-app.post("/cadastrar-usuario", cadastrarUsuario);
-
-// Rota para interação com o bot
-app.post("/interagir-bot", (req, res) => {
-    // Exemplo simples de interação com o bot
-    res.json({ message: "Bot interagindo com sucesso!" });
-});
-
-// Rota para obter a lista de usuários registrados
+// Rota para obter a lista de usuários cadastrados
 app.get("/get-usuarios", (req, res) => {
-    const usuarios = carregarUsuarios();
-    res.json(usuarios);
+    const users = loadUsers();
+    res.json(users);
 });
 
-// Validação de chave de acesso
-app.get('/validate-key', (req, res) => {
-    const { accessKey, phoneNumber } = req.query;
-
-    if (!accessKey || !phoneNumber) {
-        return res.status(400).json({ isValid: false, error: 'Parâmetros ausentes (accessKey ou phoneNumber)' });
-    }
-
-    const users = carregarUsuarios();
-    const user = users[phoneNumber];
-
-    if (!user || user.accessKey !== accessKey || new Date(user.expiresAt) < new Date()) {
-        return res.status(400).json({ isValid: false, error: 'Chave inválida ou expirada' });
-    }
-
-    res.json({ isValid: true });
-});
-
-// Função para renovar a chave de acesso
-app.post("/renovar-chave", (req, res) => {
-    const { numero } = req.body;
-    const usuarios = carregarUsuarios();
-
-    if (!usuarios[numero]) {
-        return res.status(404).json({ error: "Usuário não encontrado!" });
-    }
-
-    usuarios[numero].accessKey = gerarChaveAcesso();
-    usuarios[numero].expiresAt = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
-    salvarUsuarios(usuarios);
-
-    res.json({ message: "Chave de acesso renovada com sucesso!" });
-});
-
-// Rota para ligar/desligar o bot
-app.post('/ligar-bot', (req, res) => {
-    res.json({ message: "Bot ligado com sucesso!" });
-});
-
-app.post('/desligar-bot', (req, res) => {
-    res.json({ message: "Bot desligado com sucesso!" });
-});
+// Serve todos os arquivos estáticos
+app.use(express.static(__dirname));
 
 // Rota para admin.html
 app.get("/admin", (req, res) => {
-    res.sendFile(path.join(__dirname, "public/admin.html"));
+    res.sendFile(path.join(__dirname, "admin.html"));
 });
 
-// Rota principal para index.html
+// Rota principal servindo index.html
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public/index.html"));
+    res.sendFile(path.join(__dirname, "index.html"));
 });
+
+// Funções auxiliares para manipular keys.json
+const loadKeys = () => {
+    try {
+        return JSON.parse(fs.readFileSync('keys.json', 'utf8'));
+    } catch (error) {
+        return {};
+    }
+};
+
+const saveKeys = (keys) => {
+    fs.writeFileSync('keys.json', JSON.stringify(keys, null, 2), 'utf8');
+};
+
+// Funções auxiliares para botStatus.json
+const loadBotStatus = () => {
+    try {
+        return JSON.parse(fs.readFileSync('botStatus.json', 'utf8'));
+    } catch (error) {
+        return {};
+    }
+};
+
+const saveBotStatus = (status) => {
+    fs.writeFileSync('botStatus.json', JSON.stringify(status, null, 2), 'utf8');
+};
+
+// Endpoint para carregar todas as chaves registradas
+app.get('/get-keys', (req, res) => {
+    try {
+        const keys = loadKeys();
+        res.json(keys);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao carregar as chaves.' });
+    }
+});
+
+// Permite todas as origens
+app.use(cors());
 
 // Iniciando o servidor
 app.listen(PORT, () => {
