@@ -1,20 +1,14 @@
 {
-  "name": "whatsappai",
+  "name": "meu-projeto",
   "version": "1.0.0",
-  "description": "WhatsApp Bot com Chave de Acesso e QR Code",
-  "main": "server.js",
+  "main": "main/server/server.js",   // Atualizando o caminho
   "scripts": {
-    "start": "node server.js"
+    "start": "node main/server/server.js"   // Atualizando o caminho para o script de start
   },
   "dependencies": {
-    "axios": "^1.7.9",
+    "express": "^4.17.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "fs": "^0.0.1-security",
-    "puppeteer": "^19.0.0",
-    "qrcode": "^1.5.4",
-    "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "^1.26.0"
+    "axios": "^0.21.1",
+    "dotenv": "^10.0.0"
   }
 }
