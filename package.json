@@ -4,7 +4,7 @@
   "main": "main/server/server.js",
   "scripts": {
   "start": "node BotWhatsapp/server/server.js"
-}
+},
 
   },
   "dependencies": {
