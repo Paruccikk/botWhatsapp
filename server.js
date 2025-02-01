@@ -47,53 +47,47 @@ app.post("/login", (req, res) => {
     res.json({ message: "Login bem-sucedido!", empresa: users[phoneNumber].empresa });
 });
 
-// 🟢 Cadastro de Usuário
-app.post('/cadastrar-usuario', (req, res) => {
+const crypto = require("crypto");
+
+// Cadastro de novo usuário
+app.post("/cadastrar-usuario", (req, res) => {
     const { numero, senha, empresa } = req.body;
 
     if (!numero || !senha || !empresa) {
-        return res.status(400).json({ error: 'Número, senha e empresa são obrigatórios.' });
+        return res.status(400).json({ error: "Número, senha e empresa são obrigatórios." });
     }
 
-    const users = loadUsers(); // Agora carrega do usuarios.json
+    const users = loadUsers();
 
     if (users[numero]) {
-        return res.status(400).json({ error: 'Número já cadastrado.' });
+        return res.status(400).json({ error: "Número já cadastrado." });
     }
 
+    // Gerar uma chave de acesso única
+    const accessKey = crypto.randomBytes(16).toString("hex");
+
+    // Definir expiração para 30 dias
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    // Adicionar usuário ao banco de dados (usuarios.json)
     users[numero] = {
         password: senha,
+        accessKey,
+        expiresAt: expiresAt.toISOString(),
         empresa
     };
 
     saveUsers(users);
-    res.status(200).json({ message: 'Usuário cadastrado com sucesso!' });
+    res.status(200).json({ message: "Usuário cadastrado com sucesso!", accessKey });
 });
 
-app.post('/renovar-chave', (req, res) => {
-    const { numero } = req.body;
 
-    if (!numero) {
-        return res.status(400).json({ error: 'Número de telefone é obrigatório.' });
-    }
-
-    const keys = loadKeys();
-
-    if (!keys[numero]) {
-        return res.status(404).json({ error: 'Usuário não encontrado.' });
-    }
-
-    // Gera nova chave e define validade de 30 dias
-    const newAccessKey = crypto.randomBytes(16).toString('hex');
-    const newExpiresAt = new Date();
-    newExpiresAt.setDate(newExpiresAt.getDate() + 30);
-
-    keys[numero] = { accessKey: newAccessKey, expiresAt: newExpiresAt.toISOString() };
-    saveKeys(keys);
-
-    res.json({ message: 'Chave renovada com sucesso!', accessKey: newAccessKey });
+// Rota para obter a lista de usuários cadastrados
+app.get("/get-usuarios", (req, res) => {
+    const users = loadUsers();
+    res.json(users);
 });
-
 
 
 // Serve todos os arquivos estáticos
