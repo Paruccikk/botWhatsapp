@@ -27,8 +27,6 @@ const carregarUsuarios = () => {
     }
 };
 
-const fs = require('fs');
-
 // Função para carregar usuários do arquivo
 const loadUsers = () => {
     try {
