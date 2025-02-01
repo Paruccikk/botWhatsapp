@@ -1,6 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
-const { obterRespostaIA } = require('./botService'); // Importa a função para obter a resposta da IA
+const { obterRespostaIA } = require('./public/deepseek'); // Importa a função de resposta da IA
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -27,6 +27,7 @@ client.on('qr', (qr) => {
     }
 });
 
+
 // Evento quando o cliente estiver pronto
 client.on('ready', () => {
     console.log("✅ Cliente WhatsApp conectado com sucesso!");
@@ -40,8 +41,8 @@ client.on('message', async (message) => {
     // Verifica se a mensagem NÃO vem de um grupo e se foi recebida após o bot ter iniciado
     if (!message.from.includes("@g.us") && message.timestamp * 1000 > global.botStartTime) {
         try {
-            // Chama a função para obter a resposta da IA (com base na pergunta e no número)
-            const resposta = await obterRespostaIA(message.body, message.from);
+            // Obtém resposta da IA simulada (ou do DeepSeek quando for implementado)
+            const resposta = await obterRespostaIA(message.body, message._data.notifyName);
 
             // Envia a resposta para o usuário
             await client.sendMessage(message.from, resposta);
@@ -53,6 +54,7 @@ client.on('message', async (message) => {
         console.log("📩 Ignorando mensagem anterior ao início do bot.");
     }
 });
+
 
 // Inicializa o cliente do WhatsApp
 client.initialize().catch(error => {
