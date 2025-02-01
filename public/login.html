@@ -3,56 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Login IA</title>
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link para o novo CSS -->
+    <script defer src="/js/login.js"></script>
 </head>
 <body>
-    <!-- Cabeçalho -->
-    <header>
-        <nav>
-            <a class="logo" href="index.html">Login IA</a>
-            <div class="mobile-menu">
-                <div class="line1"></div>
-                <div class="line2"></div>
-                <div class="line3"></div>
-            </div>
-            <ul class="nav-list">
-                <li><a href="index.html">Início</a></li>
-                <li><a href="contato.html">Contato</a></li>
-                <li><a href="admin.html">Admin</a></li>
-            </ul>
-        </nav>
-    </header>
-    <form id="loginForm">
-        <input type="text" id="phoneNumber" placeholder="Número de telefone">
-        <input type="password" id="password" placeholder="Senha">
+    <h1>Login 🔑</h1>
+    <br><br>
+    <form id="login-form">
+        <input type="text" id="phoneNumber" placeholder="Número" required>
+        <input type="password" id="password" placeholder="Senha" required>
         <button type="submit">Entrar</button>
+        <div id="login-message" class="message"></div>
     </form>
-    
-    <script>
-        document.getElementById("loginForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
-            
-            const phoneNumber = document.getElementById("phoneNumber").value;
-            const password = document.getElementById("password").value;
-    
-            const response = await fetch("/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phoneNumber, password })
-            });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-                alert(`Login bem-sucedido! Empresa: ${data.empresa}`);
-                window.location.href = "index.html"; // Redireciona para o painel
-            } else {
-                alert("Erro: " + data.error);
-            }
-        });
-    </script>
-    
+    <div id="login-error" style="color:red; display:none;">Número ou senha incorretos</div>
 
+    <script src="js/index.js"></script>
+
+    
 </body>
 </html>
