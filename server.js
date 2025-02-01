@@ -66,17 +66,20 @@ app.post("/cadastrar-usuario", (req, res) => {
     res.json({ message: "Usuário cadastrado com sucesso!" });
 });
 
+// Validação de chave de acesso
 app.get('/validate-key', (req, res) => {
     const { accessKey, phoneNumber } = req.query;
 
-    // Lógica para verificar se a chave e o número são válidos
-    const user = carregarDadosEmpresa(phoneNumber); // Função que carrega os dados do usuário
+    // Verifique se a chave de acesso e número são válidos
+    const users = loadUsers();
+    const user = users[phoneNumber];
     if (user && user.accessKey === accessKey) {
         return res.json({ isValid: true });
     } else {
-        return res.json({ isValid: false });
+        return res.status(400).json({ isValid: false, error: "Chave ou número inválidos" });
     }
 });
+
 
 
 // Função para renovar a chave de acesso
