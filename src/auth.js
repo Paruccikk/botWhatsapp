@@ -130,3 +130,13 @@ document.getElementById("activationForm").addEventListener("submit", async funct
         showMessage("activation-message", "Chave inválida ou expirada!", 'error'); // Exibe mensagem de erro
     }
 });
+
+// Verifique se está no navegador antes de acessar o DOM
+if (typeof document !== 'undefined') {
+    // Código que manipula o DOM
+    document.getElementById("formulário-de-registro").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        // Lógica de envio do formulário
+    });
+}
+
