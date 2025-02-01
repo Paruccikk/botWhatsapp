@@ -5,7 +5,7 @@ const fs = require('fs');
 require('dotenv').config();
 
 // Importações corrigidas
-const { login, cadastrarUsuario } = require('./src/auth');  
+const { login, cadastrarUsuario } = require('./src/auth');  // Verifique se o caminho está correto 
 const { interagirComBot } = require('./src/botService');  
 const client = require('./src/whatsappClient');  // Importando o WhatsApp Client
 
