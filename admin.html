@@ -80,16 +80,34 @@
             }
 
             // Função de formatação de data
-            function formatarData(isoString) {
-                if (!isoString) return "Data inválida";
+            function formatarData(dataString) {
+            const data = new Date(dataString);
+            const dia = data.getDate().toString().padStart(2, '0');
+            const mes = (data.getMonth() + 1).toString().padStart(2, '0'); // Mes começa em 0
+            const ano = data.getFullYear();
 
-                const data = new Date(isoString);
-                const dia = String(data.getDate()).padStart(2, "0");
-                const mes = String(data.getMonth() + 1).padStart(2, "0");
-                const ano = data.getFullYear();
-
-                return `${dia}-${mes}-${ano}`;
+            return `${dia}-${mes}-${ano}`;
             }
+            
+                const dataExpiracao = formatarData(usuario.expiresAt);
+                console.log(dataExpiracao);  // Exemplo: "03-03-2025"
+
+
+
+                const gerarQRCode = (accessKey) => {
+                const qrcode = new QRCode(document.getElementById("qrCodeSection"), {
+                    text: accessKey,
+                    width: 128,
+                    height: 128,
+                });
+                };
+
+                // Ao exibir os usuários no painel de admin:
+                usuarios.forEach(usuario => {
+                // Gerar QR Code para cada usuário
+                gerarQRCode(usuario.accessKey);
+                });
+
 
             // Formulário de cadastro de usuário
             formCadastrar.addEventListener("submit", async (e) => {

@@ -34,6 +34,7 @@
             <button type="submit">Entrar</button>
         </form>
     </main>
+    
 
     <footer>
         <center><p>© 2025 Logo Empresa</p></center>
@@ -46,6 +47,12 @@
         mobileMenu.addEventListener('click', () => {
             navList.classList.toggle('active');
             mobileMenu.classList.toggle('active');
+
+            document.querySelector("form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Previne o reload da página
+            // Lógica de cadastro/login vai aqui...
+            });
+
         });
     </script>
 </body>
