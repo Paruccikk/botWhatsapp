@@ -18,6 +18,16 @@ const PORT = process.env.PORT || 3000;
 // Serve arquivos estáticos (como index.html, admin.html) da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Função para carregar usuários do arquivo
+const carregarUsuarios = () => {
+    try {
+        return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
+    } catch (error) {
+        console.error("Erro ao carregar os usuários:", error);
+        return {};
+    }
+};
+
 // Função auxiliar para gerar chave de acesso
 const gerarChaveAcesso = () => Math.random().toString(36).substring(2, 15);
 
@@ -39,7 +49,7 @@ app.post("/interagir-bot", interagirComBot);
 
 // Rota para obter a lista de usuários registrados
 app.get("/get-usuarios", (req, res) => {
-    const usuarios = carregarUsuarios(); // Se você não está usando fs diretamente aqui, considere revisar a função carregarUsuarios()
+    const usuarios = carregarUsuarios();
     res.json(usuarios);
 });
 
@@ -47,7 +57,7 @@ app.get("/get-usuarios", (req, res) => {
 app.get('/validate-key', (req, res) => {
     const { accessKey, phoneNumber } = req.query;
 
-    const users = carregarUsuarios(); // Aqui também, se você estiver manipulando arquivos, considere uma alternativa sem fs
+    const users = carregarUsuarios();
     const user = users[phoneNumber];
 
     if (!user || user.accessKey !== accessKey || new Date(user.expiresAt) < new Date()) {
@@ -60,7 +70,7 @@ app.get('/validate-key', (req, res) => {
 // Função para renovar a chave de acesso
 app.post("/renovar-chave", (req, res) => {
     const { numero } = req.body;
-    const usuarios = carregarUsuarios(); // Idem, revisar se usa fs aqui
+    const usuarios = carregarUsuarios();
 
     if (!usuarios[numero]) {
         return res.status(404).json({ error: "Usuário não encontrado!" });
@@ -68,8 +78,8 @@ app.post("/renovar-chave", (req, res) => {
 
     usuarios[numero].accessKey = gerarChaveAcesso();
     usuarios[numero].expiresAt = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    fs.writeFileSync('usuarios.json', JSON.stringify(usuarios, null, 2));
 
-    // Considerar uma solução para salvar os dados sem fs (ou movê-lo para um banco de dados)
     res.json({ message: "Chave de acesso renovada com sucesso!" });
 });
 
