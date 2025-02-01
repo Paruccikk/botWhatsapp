@@ -1,4 +1,3 @@
-// botService.js
 const axios = require("axios");
 const fs = require("fs");
 require("dotenv").config(); // Carrega as variáveis de ambiente do arquivo .env
@@ -55,18 +54,4 @@ async function obterRespostaIA(mensagem, numero) {
     }
 }
 
-// Função que processa a interação do bot
-const interagirComBot = (req, res) => {
-    const { mensagem, numero } = req.body;
-
-    // Verificar se a mensagem e o número foram passados na requisição
-    if (!mensagem || !numero) {
-        return res.status(400).json({ error: "Mensagem e número são obrigatórios." });
-    }
-
-    // Verificar se a pergunta tem uma resposta personalizada ou chama a IA
-    const respostaBot = verificarPerguntaEmpresa(mensagem, numero);
-    res.json({ resposta: respostaBot });
-};
-
-module.exports = { interagirComBot };
+module.exports = { obterRespostaIA, verificarPerguntaEmpresa };
