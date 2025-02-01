@@ -27,6 +27,19 @@ const carregarUsuarios = () => {
     }
 };
 
+const fs = require('fs');
+
+// Função para carregar usuários do arquivo
+const loadUsers = () => {
+    try {
+        return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
+    } catch (error) {
+        console.error("Erro ao carregar os usuários:", error);
+        return {};
+    }
+};
+
+
 // Salvar dados dos usuários no arquivo JSON
 const salvarUsuarios = (usuarios) => {
     fs.writeFileSync('usuarios.json', JSON.stringify(usuarios, null, 2));
@@ -70,15 +83,16 @@ app.post("/cadastrar-usuario", (req, res) => {
 app.get('/validate-key', (req, res) => {
     const { accessKey, phoneNumber } = req.query;
 
-    // Verifique se a chave de acesso e número são válidos
-    const users = loadUsers();
+    const users = loadUsers(); // Carrega os dados dos usuários do arquivo JSON
     const user = users[phoneNumber];
-    if (user && user.accessKey === accessKey) {
-        return res.json({ isValid: true });
-    } else {
-        return res.status(400).json({ isValid: false, error: "Chave ou número inválidos" });
+
+    if (!user || user.accessKey !== accessKey || new Date(user.expiresAt) < new Date()) {
+        return res.status(400).json({ isValid: false, error: 'Chave inválida ou expirada' });
     }
+
+    res.json({ isValid: true });
 });
+
 
 
 
