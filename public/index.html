@@ -37,69 +37,26 @@
         <button type="submit">Ativar BOT</button>
     </form>
 
-        <br>
-        <!-- Botão de ligar/desligar bot -->
-        <div id="botControlSection">
-            <button id="toggleBotButton" style="background-color: red;">Desligar Bot</button>
-        </div>
+    <br>
+    <!-- Botão de ligar/desligar bot -->
+    <div id="botControlSection">
+        <button id="toggleBotButton" style="background-color: red;">Desligar Bot</button>
+    </div>
 
     <div id="qrCodeSection" style="display: none;">
         <h2>Escaneie o QR Code para ativar o bot:</h2>
         <img id="qrCodeImage" src="" alt="QR Code">
     </div>
 
+    <h2>Adicionar Pergunta e Resposta</h2>
+    <form id="addQuestionForm">
+        <label for="keyword">Palavra chave:</label>
+        <input type="text" id="keyword" required>
+        <label for="response">Resposta:</label>
+        <textarea id="response" required></textarea>
+        <button type="submit">Adicionar</button>
+    </form>
 
-            <h2>Adicionar Pergunta e Resposta</h2>
-<form id="addQuestionForm">
-    <label for="keyword">Palavra chave:</label>
-    <input type="text" id="keyword" required>
-    <label for="response">Resposta:</label>
-    <textarea id="response" required></textarea>
-    <button type="submit">Adicionar</button>
-</form>
-
-<script>
-    document.getElementById('addQuestionForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const keyword = document.getElementById('keyword').value;
-        const response = document.getElementById('response').value;
-        
-        const phoneNumber = 'Número do Usuário'; // Recuperar o número do usuário logado
-        
-        const result = await fetch(`/adicionar-pergunta`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phoneNumber, keyword, response })
-        });
-        
-        const data = await result.json();
-        if (data.success) {
-            alert('Pergunta e resposta adicionadas com sucesso!');
-        } else {
-            alert('Erro ao adicionar pergunta.');
-        }
-    });
-</script>
-
-
-    <!-- Rodapé -->
-    <footer>
-        <div class="footer-container">
-            <div class="content">
-                <div class="footer-top">
-                    <div class="footer-contact">
-                        <br><br>
-                        <p> IA WhatsApp </p>
-                    </div>
-                </div>
-                <div class="footer-bottom">
-                    <p>⚡ Desenvolvido por Daniel Parucci | 2024 - 2025</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-    
     <script>
         // Função para ativar o bot ao submeter a chave de acesso
         document.getElementById('activationForm').addEventListener('submit', async function(event) {
@@ -108,18 +65,17 @@
             const phoneNumber = document.getElementById('phoneNumber').value;
 
             // Verificar se a chave é válida e se não expirou
-            const isKeyValid = await fetch(`https://botwhatsapp-oxct.onrender.com/validate-key?accessKey=${accessKey}&phoneNumber=${phoneNumber}`)
-                .then(res => res.json())
-                .then(data => data.isValid);
+            const response = await fetch(`/validate-key?accessKey=${accessKey}&phoneNumber=${phoneNumber}`);
+            const data = await response.json();
 
-            if (isKeyValid) {
+            if (data.isValid) {
                 // Chave válida, agora exibe o QR code
-                const response = await fetch('https://botwhatsapp-oxct.onrender.com/generate-qr');
-                const data = await response.json();
+                const qrResponse = await fetch('/generate-qr');
+                const qrData = await qrResponse.json();
 
                 // Exibe o QR Code na tela
                 document.getElementById('qrCodeSection').style.display = 'block';
-                document.getElementById('qrCodeImage').src = data.qrCodeUrl;
+                document.getElementById('qrCodeImage').src = qrData.qrCodeUrl;
             } else {
                 alert("Chave inválida ou expirada! Entre em contato com o administrador.");
             }
@@ -135,14 +91,14 @@
             }
 
             // Verifica o estado do bot e alterna entre ligado/desligado
-            const botStatus = await fetch(`https://botwhatsapp-oxct.onrender.com/get-bot-status?phoneNumber=${phoneNumber}`)
-                .then(res => res.json())
-                .then(data => data.status);
+            const botStatusResponse = await fetch(`/get-bot-status?phoneNumber=${phoneNumber}`);
+            const botStatusData = await botStatusResponse.json();
+            const botStatus = botStatusData.status;
 
             const action = botStatus === 'ativo' ? 'desligar-bot' : 'ligar-bot';
             
             // Envia a solicitação para o servidor para mudar o estado do bot
-            const response = await fetch(`https://botwhatsapp-oxct.onrender.com/${action}`, {
+            const botResponse = await fetch(`/${action}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -150,12 +106,35 @@
                 body: JSON.stringify({ numero: phoneNumber })
             });
 
-            if (response.ok) {
+            if (botResponse.ok) {
                 const newStatus = action === 'desligar-bot' ? 'desligado' : 'ativo';
                 document.getElementById('toggleBotButton').style.backgroundColor = newStatus === 'ativo' ? 'green' : 'red';
                 document.getElementById('toggleBotButton').textContent = newStatus === 'ativo' ? 'Desligar Bot' : 'Ligar Bot';
             } else {
                 alert("Erro ao atualizar o estado do bot. Tente novamente mais tarde.");
+            }
+        });
+
+        // Função para adicionar pergunta e resposta
+        document.getElementById('addQuestionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const keyword = document.getElementById('keyword').value;
+            const response = document.getElementById('response').value;
+            
+            const phoneNumber = 'Número do Usuário'; // Aqui você deve pegar o número do usuário logado
+            
+            const result = await fetch(`/adicionar-pergunta`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber, keyword, response })
+            });
+            
+            const data = await result.json();
+            if (data.success) {
+                alert('Pergunta e resposta adicionadas com sucesso!');
+            } else {
+                alert('Erro ao adicionar pergunta.');
             }
         });
     </script>
