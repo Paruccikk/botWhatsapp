@@ -1,35 +1,26 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-// Importando as funções de login, cadastro, e bot
-const { login, cadastrarUsuario } = require('./src/auth'); // Atualizar o caminho para 'src/auth'
-const { interagirComBot } = require('./src/botService');  // Atualizar o caminho para 'src/botService'
+// Importações corrigidas
+const { login, cadastrarUsuario } = require('./src/auth');  
+const { interagirComBot } = require('./src/botService');  
+const client = require('./src/whatsappClient');  // Importando o WhatsApp Client
 
-const app = express();  // Inicializa o app aqui
+const app = express();  
 app.use(express.json());
 app.use(cors());
-app.use(express.static("public"))
+app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
 
-// Serve os arquivos estáticos (como index.html, admin.html) da pasta 'public'
+// Serve arquivos estáticos (como index.html, admin.html) da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Carregar dados dos usuários a partir do arquivo (exemplo em JSON)
-const carregarUsuarios = () => {
-    try {
-        return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
-    } catch (error) {
-        return {}; // Retorna um objeto vazio se o arquivo não existir
-    }
-};
-
 // Função para carregar usuários do arquivo
-const loadUsers = () => {
+const carregarUsuarios = () => {
     try {
         return JSON.parse(fs.readFileSync('usuarios.json', 'utf8'));
     } catch (error) {
@@ -41,18 +32,11 @@ const loadUsers = () => {
 // Rota para gerar o QR Code
 app.get('/generate-qr', (req, res) => {
     if (global.qrCodeUrl) {
-        res.json({ qrCodeUrl: global.qrCodeUrl });  // Retorna a URL do QR Code gerado
+        res.json({ qrCodeUrl: global.qrCodeUrl });  
     } else {
-        res.status(404).json({ error: "QR Code não gerado ainda." });  // Retorna erro se o QR Code ainda não foi gerado
+        res.status(404).json({ error: "QR Code não gerado ainda." });  
     }
 });
-
-
-
-// Salvar dados dos usuários no arquivo JSON
-const salvarUsuarios = (usuarios) => {
-    fs.writeFileSync('usuarios.json', JSON.stringify(usuarios, null, 2));
-};
 
 // Rotas de login e cadastro
 app.post("/login", login);
@@ -67,32 +51,11 @@ app.get("/get-usuarios", (req, res) => {
     res.json(usuarios);
 });
 
-// Rota para cadastrar um novo usuário
-app.post("/cadastrar-usuario", (req, res) => {
-    const { numero, senha, empresa } = req.body;
-
-    const usuarios = carregarUsuarios();
-    if (usuarios[numero]) {
-        return res.status(400).json({ error: "Usuário já existe!" });
-    }
-
-    const novaChave = gerarChaveAcesso(); // Gerar uma nova chave de acesso
-    usuarios[numero] = {
-        senha,
-        empresa,
-        accessKey: novaChave,
-        expiresAt: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString() // Chave expira em 7 dias
-    };
-    salvarUsuarios(usuarios);
-
-    res.json({ message: "Usuário cadastrado com sucesso!" });
-});
-
 // Validação de chave de acesso
 app.get('/validate-key', (req, res) => {
     const { accessKey, phoneNumber } = req.query;
 
-    const users = loadUsers(); // Carrega os dados dos usuários do arquivo JSON
+    const users = carregarUsuarios();
     const user = users[phoneNumber];
 
     if (!user || user.accessKey !== accessKey || new Date(user.expiresAt) < new Date()) {
@@ -102,45 +65,30 @@ app.get('/validate-key', (req, res) => {
     res.json({ isValid: true });
 });
 
-
-
-
 // Função para renovar a chave de acesso
 app.post("/renovar-chave", (req, res) => {
     const { numero } = req.body;
-
     const usuarios = carregarUsuarios();
-    const usuario = usuarios[numero];
-    if (!usuario) {
+
+    if (!usuarios[numero]) {
         return res.status(404).json({ error: "Usuário não encontrado!" });
     }
 
-    usuario.accessKey = gerarChaveAcesso(); // Gerar uma nova chave de acesso
-    usuario.expiresAt = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(); // Nova data de expiração
-
-    salvarUsuarios(usuarios);
+    usuarios[numero].accessKey = gerarChaveAcesso();
+    usuarios[numero].expiresAt = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    fs.writeFileSync('usuarios.json', JSON.stringify(usuarios, null, 2));
 
     res.json({ message: "Chave de acesso renovada com sucesso!" });
 });
 
-// Função para gerar uma chave de acesso aleatória
-const gerarChaveAcesso = () => {
-    return Math.random().toString(36).substring(2, 15);
-};
-
 // Rota para ligar/desligar o bot
 app.post('/ligar-bot', (req, res) => {
-    // Lógica para ligar o bot
     res.json({ message: "Bot ligado com sucesso!" });
 });
 
 app.post('/desligar-bot', (req, res) => {
-    // Lógica para desligar o bot
     res.json({ message: "Bot desligado com sucesso!" });
 });
-
-// Serve os arquivos estáticos (como index.html, admin.html)
-app.use(express.static(__dirname));
 
 // Rota para admin.html
 app.get("/admin", (req, res) => {
@@ -156,3 +104,6 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
+
+// Função auxiliar para gerar chave de acesso
+const gerarChaveAcesso = () => Math.random().toString(36).substring(2, 15);

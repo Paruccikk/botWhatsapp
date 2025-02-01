@@ -55,7 +55,7 @@ document.getElementById("login-form").addEventListener("submit", async function(
     if (response.ok) {
         const data = await response.json();
         showMessage("login-message", data.message, 'success'); // Exibe mensagem de sucesso
-        window.location.href = "/admin"; // Redireciona para a página de admin
+        window.location.href = "/index.html"; // Redireciona para a página de admin
     } else {
         const error = await response.json();
         showMessage("login-message", error.error, 'error'); // Exibe mensagem de erro

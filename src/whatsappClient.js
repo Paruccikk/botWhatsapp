@@ -1,36 +1,25 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
-const { obterRespostaIA } = require('./deepseek'); // Importa a função de resposta da IA
 
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: { headless: true }
 });
 
-// Variável global para armazenar o QR Code e o timestamp do bot
+// Variáveis globais para armazenar QR Code e status do bot
 global.qrCodeUrl = null;
-global.botStartTime = null;  // Armazenar o timestamp quando o bot estiver pronto
+global.botStartTime = null;
 
-// Evento para gerar o QR Code
-client.on('qr', (qr) => {
-    console.log("QR Code gerado:", qr);  // Log para verificar se o evento está sendo disparado
-    if (!global.qrCodeUrl) {
-        qrcode.toDataURL(qr, (err, url) => {
-            if (err) {
-                console.error("Erro ao gerar QR Code:", err);
-                return;
-            }
-            global.qrCodeUrl = url;
-            console.log("QR Code gerado com sucesso!");
-        });
-    }
+// Evento para capturar e armazenar o QR Code
+client.on('qr', async (qr) => {
+    console.log("QR Code gerado:", qr);
+    global.qrCodeUrl = await qrcode.toDataURL(qr);
 });
 
-
-// Evento quando o cliente estiver pronto
+// Evento para indicar que o bot está pronto
 client.on('ready', () => {
     console.log("✅ Cliente WhatsApp conectado com sucesso!");
-    global.botStartTime = new Date().getTime(); // Salva o timestamp quando o bot estiver pronto
+    global.botStartTime = new Date().getTime();
 });
 
 // Inicializa o cliente do WhatsApp
