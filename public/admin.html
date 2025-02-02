@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Gerenciar Chaves 🔑</title>
+    <link rel="stylesheet" href="admin.css"> <!-- Arquivo CSS externo -->
+</head>
+<body>
+    <header>
+        <h1>🔑 Painel de Administração</h1>
+    </header>
+
+    <div class="container">
+        <h2>👤 Cadastrar Novo Usuário</h2>
+        <form id="form-cadastrar">
+            <input type="text" id="numero-cadastro" placeholder="📞 Número com DDD" required>
+            <input type="password" id="senha-cadastro" placeholder="🔑 Senha" required>
+            <input type="text" id="empresa-cadastro" placeholder="🏢 Nome da Empresa" required>
+            <button type="submit">➕ Cadastrar</button>
+        </form>
+
+        <h2>📋 Lista de Usuários Registrados</h2>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>📞 Número</th>
+                    <th>🏢 Empresa</th>
+                    <th>🔑 Chave de Acesso</th>
+                    <th>📅 Expiração</th>
+                    <th>⚙️ Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Usuários serão carregados aqui -->
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <center><p>⚡ Desenvolvido por Daniel Parucci | 2024 - 2025</p></center>
+    </footer>
+
+    <script src="admin.js"></script>
+</body>
+</html>
