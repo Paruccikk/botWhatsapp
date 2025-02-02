@@ -30,8 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isNaN(data)) {
             return "Data inválida";
         }
-        return data.toLocaleDateString("pt-BR");
+        return data.toLocaleDateString("pt-BR"); // Formata a data como 'dd/mm/aaaa'
     }
+    
     
     
 
