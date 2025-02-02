@@ -58,7 +58,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.renovarChave = async function(telefone) {  // Alterado para telefone
         try {
-            const response = await fetch(`/renovar-chave?numero=${telefone}`, { method: "POST" });  // Alterado para telefone
+            const response = await fetch("/renovar-chave", { 
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ numero: telefone })  // Passando o número no corpo da requisição
+            });
+    
             if (!response.ok) throw new Error("Erro ao renovar chave");
             alert("Chave renovada com sucesso!");
             carregarUsuarios();
@@ -66,6 +73,5 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Erro ao renovar chave: " + error.message);
         }
     };
-
-    carregarUsuarios();
+    
 });
