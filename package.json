@@ -1,7 +1,7 @@
 {
   "name": "wowatende",
   "version": "1.0.0",
-  "main": "src/js/server.js",
+  "main": "server.js",
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.18.2",
@@ -11,7 +11,7 @@
     "whatsapp-web.js": "^1.26.0"
   },
   "scripts": {
-    "start": "./start.sh"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC"
