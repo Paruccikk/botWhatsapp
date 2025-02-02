@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
+                // Certifique-se de que o URL do backend está correto aqui
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -155,51 +156,53 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Função para carregar usuários na tabela do Dashboard
-    const tabelaUsuarios = document.getElementById("usersTable")?.getElementsByTagName("tbody")[0];
-    async function carregarUsuarios() {
-        if (!tabelaUsuarios) {
-            console.error('Elemento de tabela não encontrado!');
-            return;
-        }
+    // Função para carregar usuários na tabela do Dashboard (só na admin.html)
+    if (window.location.pathname.includes('admin.html')) {
+        const tabelaUsuarios = document.getElementById("usersTable")?.getElementsByTagName("tbody")[0];
 
-        try {
-            const response = await fetch("data/data.json");  // Altere o caminho para o seu arquivo JSON
-            if (!response.ok) throw new Error(`Erro ${response.status}: ${response.statusText}`);
-            
-            const usuarios = await response.json();
+        if (tabelaUsuarios) {
+            async function carregarUsuarios() {
+                try {
+                    const response = await fetch("/get-usuarios");
+                    if (!response.ok) throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                    
+                    const usuarios = await response.json();
 
-            if (!usuarios || Object.keys(usuarios).length === 0) {
-                alert("Nenhum usuário encontrado.");
-                return;
+                    if (!usuarios || Object.keys(usuarios).length === 0) {
+                        alert("Nenhum usuário encontrado.");
+                        return;
+                    }
+
+                    tabelaUsuarios.innerHTML = "";  // Limpar a tabela antes de preencher
+
+                    Object.keys(usuarios).forEach(telefone => {
+                        const userData = usuarios[telefone];
+                        const row = tabelaUsuarios.insertRow();
+                        row.insertCell(0).textContent = telefone;
+                        row.insertCell(1).textContent = userData.empresa;
+                        row.insertCell(2).textContent = userData.chave;
+                        row.insertCell(3).textContent = formatarData(userData.chave_expiracao);
+                        row.insertCell(4).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${telefone}')">🔄 Renovar</button>`;
+                    });
+                } catch (error) {
+                    console.error("Erro ao carregar usuários:", error);
+                    alert(error.message);
+                }
             }
 
-            tabelaUsuarios.innerHTML = "";  // Limpar a tabela antes de preencher
+            // Função para formatar a data de expiração da chave
+            function formatarData(dataString) {
+                const data = new Date(Number(dataString));  // Certifique-se de que o valor seja um número
+                if (isNaN(data)) {
+                    return "Data inválida";
+                }
+                return data.toLocaleDateString("pt-BR");  // Formata a data como 'dd/mm/aaaa'
+            }
 
-            Object.keys(usuarios).forEach(telefone => {
-                const userData = usuarios[telefone];
-                const row = tabelaUsuarios.insertRow();
-                row.insertCell(0).textContent = telefone;
-                row.insertCell(1).textContent = userData.empresa;
-                row.insertCell(2).textContent = userData.chave;
-                row.insertCell(3).textContent = formatarData(userData.chave_expiracao);
-                row.insertCell(4).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${telefone}')">🔄 Renovar</button>`;
-            });
-        } catch (error) {
-            console.error("Erro ao carregar usuários:", error);
-            alert(error.message);
+            // Carregar usuários na página
+            carregarUsuarios();
+        } else {
+            console.error('Elemento de tabela não encontrado!');
         }
     }
-
-    // Função para formatar a data de expiração da chave
-    function formatarData(dataString) {
-        const data = new Date(Number(dataString));  // Certifique-se de que o valor seja um número
-        if (isNaN(data)) {
-            return "Data inválida";
-        }
-        return data.toLocaleDateString("pt-BR");  // Formata a data como 'dd/mm/aaaa'
-    }
-
-    // Carregar usuários na página
-    carregarUsuarios();
 });
