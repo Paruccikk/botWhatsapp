@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 const row = tabelaUsuarios.insertRow();
                 row.insertCell(0).textContent = numero;
                 row.insertCell(1).textContent = userData.empresa;
-                row.insertCell(2).textContent = userData.accessKey;
-                row.insertCell(3).textContent = formatarData(userData.expiresAt);
+                row.insertCell(2).textContent = userData.chave;
+                row.insertCell(3).textContent = formatarData(userData.chave_expiracao);
                 row.insertCell(4).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${numero}')">🔄 Renovar</button>`;
             });
         } catch (error) {
