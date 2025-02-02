@@ -135,12 +135,36 @@ app.post('/cadastro', (req, res) => {
     }
 });
 
+// 🔹 Rota para login
+app.post('/login', (req, res) => {
+    const { login, senha } = req.body;
+
+    // Carregar os dados dos usuários
+    const data = loadData();
+
+    // Verifica se o usuário existe e a senha está correta
+    const user = Object.values(data).find(user => user.usuario === login && user.senha === senha);
+
+    // Se o usuário não for encontrado ou a senha estiver errada
+    if (!user) {
+        return res.status(400).json({ success: false, message: 'Usuário ou senha inválidos' });
+    }
+
+    // Verifica se a chave de acesso expirou
+    if (new Date() > new Date(user.chave_expiracao)) {
+        return res.status(400).json({ success: false, message: 'Chave expirada' });
+    }
+
+    // Login bem-sucedido
+    res.json({ success: true, message: 'Login realizado com sucesso!' });
+});
+
 // 🔹 Rota para validar chave de acesso
 app.get('/validate-key', (req, res) => {
     const chave = req.query.chave;  // Aqui estamos pegando o valor da chave na URL
 
     // Carregar o arquivo JSON
-    fs.readFile('data/data.json', 'utf8', (err, data) => {
+    fs.readFile('data.json', 'utf8', (err, data) => {
         if (err) {
             console.error("Erro ao ler o arquivo:", err);
             return res.status(500).json({ success: false, message: "Erro no servidor." });
