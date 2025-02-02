@@ -140,7 +140,7 @@ app.get('/validate-key', (req, res) => {
     const chave = req.query.chave;  // Aqui estamos pegando o valor da chave na URL
 
     // Carregar o arquivo JSON
-    fs.readFile('usuarios.json', 'utf8', (err, data) => {
+    fs.readFile('data/data.json', 'utf8', (err, data) => {
         if (err) {
             console.error("Erro ao ler o arquivo:", err);
             return res.status(500).json({ success: false, message: "Erro no servidor." });
