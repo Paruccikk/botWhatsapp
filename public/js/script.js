@@ -1,82 +1,39 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Instancia o Socket.io
-    const socket = io();
-
-    socket.on('qr', (qr) => {
-        console.log("QR Code recebido:", qr);
-        showQRCode(qr);
-    });
-
-    function showQRCode(qrComplete) {
-        if (qrComplete) {
-            document.getElementById('qrCodeImage').src = qrComplete;
-            document.getElementById('qrCodeSection').style.display = 'block';
-        } else {
-            document.getElementById('message').innerText = 'Erro ao gerar QR Code.';
-        }
-    }
-
-    // Função para carregar o arquivo JSON
-    async function buscarUsuario(telefone) {
-        try {
-            const response = await fetch(`https://botwhatsapp-oxct.onrender.com/usuario/${telefone}`);
-            
-            if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
-            }
-    
-            const data = await response.json();
-            console.log("Usuário encontrado:", data);
-            return data;
-        } catch (error) {
-            console.error("Erro ao buscar usuário:", error);
-            alert("Erro ao buscar usuário. Verifique o console para mais detalhes.");
-        }
-    }
-    
-    // Exemplo de chamada com o telefone cadastrado
-    buscarUsuario("5511974921318");
-    
-
-    carregarDadosUsuario();  // Chama a função ao carregar a página
-
-    // Função para lidar com o envio do formulário e geração do QR Code
-    document.getElementById('activationForm')?.addEventListener('submit', async function (event) {
+    document.getElementById('activationForm').addEventListener('submit', async function (event) {
         event.preventDefault();
 
         const accessKey = document.getElementById('accessKey').value;
-        const phoneNumber = document.getElementById('phoneNumber')?.value;
+        const phoneNumber = document.getElementById('phoneNumber').value;
+        const messageElement = document.getElementById('message');
 
-        // Verificação dos campos necessários
         if (!accessKey || !phoneNumber) {
-            document.getElementById('message').innerText = "Por favor, insira a chave de acesso e o número de telefone.";
+            messageElement.innerText = "Por favor, insira a chave de acesso e o número de telefone.";
             return;
         }
 
         try {
-            // Valida a chave de acesso
             const response = await fetch(`/validate-key?accessKey=${accessKey}`);
             const result = await response.json();
 
             if (result.success) {
-                // Se a chave de acesso for válida, solicita o QR Code
                 const qrResponse = await fetch(`/generate-qr?phoneNumber=${phoneNumber}`);
                 const qrResult = await qrResponse.json();
 
                 if (qrResult.success) {
-                    showQRCode(qrResult.qr);
+                    document.getElementById('qrCodeImage').src = qrResult.qr;
+                    document.getElementById('qrCodeSection').style.display = 'block';
                 } else {
-                    document.getElementById('message').innerText = qrResult.message;
+                    messageElement.innerText = qrResult.message;
                 }
             } else {
-                document.getElementById('message').innerText = result.message;
+                messageElement.innerText = result.message;
             }
         } catch (error) {
             console.error('Erro ao gerar QR Code:', error);
-            document.getElementById('message').innerText = "Erro ao gerar QR Code, tente novamente mais tarde.";
+            messageElement.innerText = "Erro ao gerar QR Code, tente novamente mais tarde.";
         }
     });
-
+    
     // Função para validar os campos do formulário (verificando se estão preenchidos)
     function validateForm(fields) {
         for (const field of fields) {

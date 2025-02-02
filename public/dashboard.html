@@ -1,151 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Arquivo CSS externo -->
+    <title>Gerar QR Code para WhatsApp</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="#" class="logo">Logo Empresa</a>
-            <ul class="nav-list">
-                <li><a href="login.html">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <h1>Dashboard</h1>
-        <p>Bem-vindo ao seu painel de controle. Ative o bot e veja o QR Code.</p>
-
-        <div id="empresaInfo"></div>
-        <div id="activationStatus"></div>
-        <div id="expirationTime"></div>
-
+    <div class="container">
+        <h2>Ativação do WhatsApp</h2>
         <form id="activationForm">
             <label for="accessKey">Chave de Acesso:</label>
-            <input type="text" id="accessKey" name="accessKey" required>
-
+            <input type="text" id="accessKey" placeholder="Digite a chave de ativação" required>
+            
             <label for="phoneNumber">Número de Telefone:</label>
-            <input type="text" id="phoneNumber" name="phoneNumber" required>
-
-            <button type="submit">Ativar Bot</button>
+            <input type="text" id="phoneNumber" placeholder="Ex: 5511998765432" required>
+            
+            <button type="submit">Gerar QR Code</button>
         </form>
-
-        <button id="toggleBotButton">Ligar Bot</button>
-
+        
+        <p id="message"></p>
+        
         <div id="qrCodeSection" style="display: none;">
+            <h3>Escaneie o QR Code abaixo:</h3>
             <img id="qrCodeImage" alt="QR Code">
         </div>
-    </main>
-
-    <footer>
-        <center><p>© 2025 Logo Empresa</p></center>
-    </footer>
-
-    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
-    <script>
-        // Integrar o código da ativação e do bot conforme você forneceu
-        document.addEventListener("DOMContentLoaded", async function() {
-            const activationForm = document.getElementById("activationForm");
-            const toggleBotButton = document.getElementById("toggleBotButton");
-            const qrCodeSection = document.getElementById("qrCodeSection");
-            const qrCodeImage = document.getElementById("qrCodeImage");
-            const empresaInfo = document.getElementById("empresaInfo");
-            const expirationTime = document.getElementById("expirationTime");
-
-            // Verifica se o usuário está logado
-            const phoneNumber = localStorage.getItem("phoneNumber");
-
-            if (!phoneNumber) {
-                alert("Usuário não está logado.");
-                window.location.href = "login.html"; // Redireciona para o login se não estiver logado
-                return;
-            }
-
-            // Função para carregar informações do usuário
-            const response = await fetch(`/usuario/${phoneNumber}`);
-            const userData = await response.json();
-
-            if (!response.ok) {
-                alert("Erro ao carregar dados do usuário.");
-                return;
-            }
-
-            // Exibe as informações da empresa e a validade da chave
-            document.getElementById('empresaInfo').textContent = `Empresa: ${userData.empresa}`;
-            updateActivationStatus(userData);
-
-            // Função para ativar o bot
-            activationForm.addEventListener("submit", async function(event) {
-                event.preventDefault();
-
-                const accessKey = document.getElementById("accessKey").value;
-                const phoneNumber = document.getElementById("phoneNumber").value;
-
-                // Valida a chave de acesso
-                const isKeyValid = await validateAccessKey(accessKey, phoneNumber);
-
-                if (isKeyValid) {
-                    // Chave válida, agora exibe o QR code
-                    const qrResponse = await fetch('https://botwhatsapp-oxct.onrender.com/generate-qr');
-                    const qrData = await qrResponse.json();
-
-                    if (qrResponse.ok) {
-                        qrCodeSection.style.display = 'block';
-                        qrCodeImage.src = qrData.qrCodeUrl;
-
-                        // Mostrar tempo restante e empresa
-                        const empresa = qrData.empresa;
-                        const expiresAt = new Date(qrData.expiresAt);
-                        const timeRemaining = formatTimeRemaining(expiresAt);
-
-                        empresaInfo.textContent = `Empresa: ${empresa}`;
-                        expirationTime.textContent = `Chave expira em: ${timeRemaining}`;
-                    } else {
-                        alert("Erro ao gerar QR Code. Tente novamente.");
-                    }
-                } else {
-                    alert("Chave inválida ou expirada! Entre em contato com o administrador.");
-                }
-            });
-
-            // Função para validar a chave de acesso
-            async function validateAccessKey(accessKey, phoneNumber) {
-                const response = await fetch(`/validate-key?accessKey=${accessKey}&phoneNumber=${phoneNumber}`);
-                const data = await response.json();
-                return data.isValid;
-            }
-
-            // Função para atualizar o status de ativação
-            function updateActivationStatus(userData) {
-                const expirationTime = new Date(userData.keyExpiration);
-                const now = new Date();
-                const timeDiff = expirationTime - now;
-
-                if (timeDiff <= 0) {
-                    document.getElementById('activationStatus').textContent = "Chave expirada!";
-                    document.getElementById('expirationTime').textContent = "A chave expirou, você precisa renová-la.";
-                } else {
-                    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                    document.getElementById('activationStatus').textContent = "Chave ativa!";
-                    document.getElementById('expirationTime').textContent = `Tempo restante: ${daysRemaining} dias`;
-                }
-            }
-
-            // Função para formatar o tempo restante até a expiração
-            function formatTimeRemaining(expiresAt) {
-                const now = new Date();
-                const diff = expiresAt - now;
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-                return `${days} dias, ${hours} horas, ${minutes} minutos`;
-            }
-        });
-    </script>
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
