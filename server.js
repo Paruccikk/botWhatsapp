@@ -107,9 +107,9 @@ app.post('/login', (req, res) => {
 
 // 🔹 Rota para validar chave de acesso
 app.get('/validate-key', (req, res) => {
-    const { accessKey } = req.query;
+    const { chave } = req.query;
     const data = loadData();
-    const user = data.find(user => user.chave === accessKey);
+    const user = data.find(user => user.chave === chave);
     
     if (!user) {
         return res.status(400).json({ success: false, message: 'Chave de acesso inválida' });
