@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log("QR Code recebido:", qr);
         showQRCode(qr);
     });
-    
+
     function showQRCode(qrComplete) {
         if (qrComplete) {
             document.getElementById('qrCodeImage').src = qrComplete;
@@ -16,45 +16,44 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    
     // Função para lidar com o envio do formulário e geração do QR Code
     document.getElementById('activationForm')?.addEventListener('submit', async function (event) {
         event.preventDefault();
+        
         const accessKey = document.getElementById('accessKey').value;
-        // Se seu formulário de ativação não tiver o campo de telefone, remova essa verificação
-        // ou ajuste conforme a lógica desejada.
-        // Exemplo: se a chave de acesso é suficiente, use apenas accessKey:
-        // const phoneNumber = document.getElementById('phoneNumber')?.value;
-
-        // Caso use o telefone, verifique se o campo existe e foi preenchido:
         const phoneNumber = document.getElementById('phoneNumber')?.value;
-        if (!phoneNumber) {
-            document.getElementById('message').innerText = "Por favor, insira o número de telefone.";
+
+        // Verificação dos campos necessários
+        if (!accessKey || !phoneNumber) {
+            document.getElementById('message').innerText = "Por favor, insira a chave de acesso e o número de telefone.";
             return;
         }
 
-        // Verificar validade da chave
-        const response = await fetch(`/validate-key?accessKey=${accessKey}`);
-        const result = await response.json();
+        try {
+            // Valida a chave de acesso
+            const response = await fetch(`/validate-key?accessKey=${accessKey}`);
+            const result = await response.json();
 
-        if (result.success) {
-            // Se o seu endpoint espera accessKey, altere para:
-            // const qrResponse = await fetch(`/generate-qr?accessKey=${accessKey}`);
-            // Caso o esperado seja o número de telefone:
-            const qrResponse = await fetch(`/generate-qr?phoneNumber=${phoneNumber}`);
-            const qrResult = await qrResponse.json();
+            if (result.success) {
+                // Se a chave de acesso for válida, solicita o QR Code
+                const qrResponse = await fetch(`/generate-qr?phoneNumber=${phoneNumber}`);
+                const qrResult = await qrResponse.json();
 
-            if (qrResult.success) {
-                showQRCode(qrResult.qr);
+                if (qrResult.success) {
+                    showQRCode(qrResult.qr);
+                } else {
+                    document.getElementById('message').innerText = qrResult.message;
+                }
             } else {
-                document.getElementById('message').innerText = qrResult.message;
+                document.getElementById('message').innerText = result.message;
             }
-        } else {
-            document.getElementById('message').innerText = result.message;
+        } catch (error) {
+            console.error('Erro ao gerar QR Code:', error);
+            document.getElementById('message').innerText = "Erro ao gerar QR Code, tente novamente mais tarde.";
         }
     });
-    
-    // Função para validar os campos do formulário (já existente)
+
+    // Função para validar os campos do formulário (verificando se estão preenchidos)
     function validateForm(fields) {
         for (const field of fields) {
             if (!field.value) {
@@ -64,10 +63,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return true;
     }
-    
+
     // Cadastro
     document.getElementById('cadastro-form')?.addEventListener('submit', async function (event) {
-        event.preventDefault(); // Impede o envio padrão do formulário
+        event.preventDefault(); // Impede o envio tradicional do formulário
 
         // Pega os valores dos campos de cadastro
         const usuario = document.getElementById('usuario');
@@ -116,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const login = document.getElementById('login');
         const senha = document.getElementById('senha');
 
+        // Valida os campos antes de enviar
         if (!validateForm([login, senha])) return;
 
         const loginData = {
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (result.success) {
                 window.location.href = 'dashboard.html';
             } else {
-                alert(result.message);
+                alert(result.message || 'Erro ao realizar login');
             }
         } catch (error) {
             console.error('Erro no login:', error);
