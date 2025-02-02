@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                // Certifique-se de que o URL do backend está correto aqui
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -83,13 +82,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const telefone = document.getElementById('telefone');
         const empresa = document.getElementById('empresa');
         const senha = document.getElementById('senha');
+        const messageElement = document.getElementById('cadastro-message');
 
         // Valida os campos antes de enviar
         if (!validateForm([usuario, telefone, empresa, senha])) return;
 
+        // Validando o telefone (deve ser numérico e com o formato de telefone brasileiro)
+        const telefoneFormatado = telefone.value.replace(/[^\d]/g, '');  // Remove qualquer caractere não numérico
+        if (telefoneFormatado.length !== 11) {
+            messageElement.innerText = "Por favor, insira um número de telefone válido (11 dígitos).";
+            return;
+        }
+
         const userData = {
             usuario: usuario.value,
-            telefone: telefone.value,
+            telefone: telefoneFormatado,
             empresa: empresa.value,
             senha: senha.value
         };
@@ -103,15 +110,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const result = await response.json();
 
-            if (response.ok) {
+            if (result.success) {
                 alert('Cadastro realizado com sucesso!');
                 window.location.href = 'index.html';
             } else {
-                alert(result.message || 'Erro no cadastro');
+                messageElement.innerText = result.message || 'Erro no cadastro';
             }
         } catch (error) {
             console.error('Erro no envio do cadastro:', error);
-            alert('Erro ao realizar cadastro, tente novamente mais tarde.');
+            messageElement.innerText = 'Erro ao realizar cadastro, tente novamente mais tarde.';
         }
     });
 

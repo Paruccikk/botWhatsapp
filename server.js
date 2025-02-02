@@ -64,15 +64,21 @@ app.post('/cadastro', (req, res) => {
             return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios' });
         }
 
+        // Verificação para garantir que o telefone tem 11 dígitos e só números
+        const telefoneFormatado = telefone.replace(/[^\d]/g, '');
+        if (telefoneFormatado.length !== 11) {
+            return res.status(400).json({ success: false, message: 'Telefone inválido. Certifique-se de incluir 11 dígitos.' });
+        }
+
         const data = loadData();
-        if (data.find(user => user.usuario === usuario)) {
-            return res.status(400).json({ success: false, message: 'Usuário já existe' });
+        if (data.find(user => user.telefone === telefoneFormatado)) {
+            return res.status(400).json({ success: false, message: 'Telefone já cadastrado' });
         }
 
         const chave = Math.random().toString(36).substr(2, 10);
         const newUser = {
             usuario,
-            telefone,
+            telefone: telefoneFormatado,
             empresa,
             senha,
             chave,
@@ -87,6 +93,7 @@ app.post('/cadastro', (req, res) => {
         res.status(500).json({ success: false, message: 'Erro interno do servidor' });
     }
 });
+
 
 // 🔹 Rota para login
 app.post('/login', (req, res) => {
