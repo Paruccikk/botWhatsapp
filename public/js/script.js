@@ -48,23 +48,26 @@ document.addEventListener('DOMContentLoaded', function () {
             const senha = document.getElementById('senha');
             const messageElement = document.getElementById('login-message');
 
-            if (!login || !senha) {
+            if (!login.value || !senha.value) {
                 messageElement.innerText = "Por favor, preencha todos os campos.";
                 return;
             }
 
             try {
+                // Envia a requisição de login para o backend
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ login: login.value, senha: senha.value }),
+                    body: JSON.stringify({ login: login.value, senha: senha.value })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
+                    // Redireciona para o dashboard em caso de sucesso
                     window.location.href = 'dashboard.html';
                 } else {
+                    // Exibe a mensagem de erro caso o login falhe
                     messageElement.innerText = result.message || "Erro ao realizar login.";
                 }
             } catch (error) {
