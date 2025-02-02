@@ -5,10 +5,10 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
 
             const chave = document.getElementById('chave').value;
-            const telefone = document.getElementById('phoneNumber').value;
+            const telefone = document.getElementById('telefone').value;
             const messageElement = document.getElementById('message');
 
-            if (!chave || !phoneNumber) {
+            if (!chave || !telefone) {
                 messageElement.innerText = "Por favor, insira a chave de acesso e o número de telefone.";
                 return;
             }
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const result = await response.json();
 
                 if (result.success) {
-                    const telefone = document.getElementById('phoneNumber').value;
+                    const telefone = document.getElementById('telefone').value;
                     const qrResponse = await fetch(`/generate-qr?telefone=${telefone}`);
 
 
