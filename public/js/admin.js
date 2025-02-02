@@ -10,14 +10,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const usuarios = await response.json();
             tabelaUsuarios.innerHTML = "";
             
-            Object.keys(usuarios).forEach(numero => {
-                const userData = usuarios[numero];
+            usuarios.forEach(userData => {
                 const row = tabelaUsuarios.insertRow();
-                row.insertCell(0).textContent = numero;
+                row.insertCell(0).textContent = userData.telefone;  // Alterado para telefone
                 row.insertCell(1).textContent = userData.empresa;
                 row.insertCell(2).textContent = userData.chave;
                 row.insertCell(3).textContent = formatarData(userData.chave_expiracao);
-                row.insertCell(4).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${numero}')">🔄 Renovar</button>`;
+                row.insertCell(4).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${userData.telefone}')">🔄 Renovar</button>`; // Alterado para telefone
             });
         } catch (error) {
             console.error("Erro ao carregar usuários:", error);
@@ -32,13 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         return data.toLocaleDateString("pt-BR"); // Formata a data como 'dd/mm/aaaa'
     }
-    
-    
-    
 
     formCadastrar.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const numero = document.getElementById("numero-cadastro").value;
+        const telefone = document.getElementById("telefone-cadastro").value;  // Alterado para telefone
         const senha = document.getElementById("senha-cadastro").value;
         const empresa = document.getElementById("empresa-cadastro").value;
 
@@ -46,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const response = await fetch("/cadastrar-usuario", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ numero, senha, empresa })
+                body: JSON.stringify({ telefone, senha, empresa })  // Alterado para telefone
             });
             const data = await response.json();
             if (response.ok) {
@@ -60,9 +56,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    window.renovarChave = async function(numero) {
+    window.renovarChave = async function(telefone) {  // Alterado para telefone
         try {
-            const response = await fetch(`/renovar-chave?numero=${numero}`, { method: "POST" });
+            const response = await fetch(`/renovar-chave?numero=${telefone}`, { method: "POST" });  // Alterado para telefone
             if (!response.ok) throw new Error("Erro ao renovar chave");
             alert("Chave renovada com sucesso!");
             carregarUsuarios();
