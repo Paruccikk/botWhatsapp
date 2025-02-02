@@ -8,21 +8,22 @@ const { Client, LocalAuth } = require('whatsapp-web.js'); // Autenticação loca
 const qrcode = require('qrcode');
 
 const app = express();
-const port = 3000;
+// Usar a porta fornecida pelo ambiente (Render) ou 3000 localmente
+const port = process.env.PORT || 3000;
 
 // Middleware para parsear JSON
 app.use(bodyParser.json());
 
 // Serve arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, '../../public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve a página inicial
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../public/index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Caminho para o arquivo de dados
-const dataFilePath = path.join(__dirname, '../../data/data.json');
+const dataFilePath = path.join(__dirname, 'data', 'data.json');
 
 // Função para carregar dados de usuários
 function loadData() {
