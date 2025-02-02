@@ -16,12 +16,14 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const response = await fetch(`/validate-key?chave=${chave}`);
                 const result = await response.json();
-
+            
                 if (result.success) {
                     const telefone = document.getElementById('telefone').value;
                     const qrResponse = await fetch(`/generate-qr?telefone=${telefone}`);
-
-
+            
+                    // Aqui você deve usar qrResponse em vez de qrResult
+                    const qrResult = await qrResponse.json();  // Defina qrResult corretamente
+            
                     if (qrResult.success) {
                         document.getElementById('qrCodeImage').src = qrResult.qr;
                         document.getElementById('qrCodeSection').style.display = 'block';
@@ -35,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Erro ao gerar QR Code:', error);
                 messageElement.innerText = "Erro ao gerar QR Code, tente novamente mais tarde.";
             }
-        });
+      });
     }
 
     // Valida se estamos na página de login (index.html)
