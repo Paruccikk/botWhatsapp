@@ -1,11 +1,11 @@
 {
-    "5511974921318": {
+    "11974921318": {
         "usuario": "Parucci",
         "telefone": "11974921318",
         "empresa": "DEV",
         "senha": "senha123",
         "chave": "abc123",
-        "chave_expiracao": "1618800000000"
+        "chave_expiracao": "1698768000000"  // Novo timestamp para a data atual
     },
     "telefone2": {
         "usuario": "Maria Oliveira",
