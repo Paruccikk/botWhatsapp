@@ -1,39 +1,79 @@
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('activationForm').addEventListener('submit', async function (event) {
-        event.preventDefault();
+    // Valida se estamos na página de ativação (dashboard.html)
+    const activationForm = document.getElementById('activationForm');
+    if (activationForm) {
+        activationForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
 
-        const accessKey = document.getElementById('accessKey').value;
-        const phoneNumber = document.getElementById('phoneNumber').value;
-        const messageElement = document.getElementById('message');
+            const accessKey = document.getElementById('accessKey').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const messageElement = document.getElementById('message');
 
-        if (!accessKey || !phoneNumber) {
-            messageElement.innerText = "Por favor, insira a chave de acesso e o número de telefone.";
-            return;
-        }
-
-        try {
-            const response = await fetch(`/validate-key?accessKey=${accessKey}`);
-            const result = await response.json();
-
-            if (result.success) {
-                const qrResponse = await fetch(`/generate-qr?phoneNumber=${phoneNumber}`);
-                const qrResult = await qrResponse.json();
-
-                if (qrResult.success) {
-                    document.getElementById('qrCodeImage').src = qrResult.qr;
-                    document.getElementById('qrCodeSection').style.display = 'block';
-                } else {
-                    messageElement.innerText = qrResult.message;
-                }
-            } else {
-                messageElement.innerText = result.message;
+            if (!accessKey || !phoneNumber) {
+                messageElement.innerText = "Por favor, insira a chave de acesso e o número de telefone.";
+                return;
             }
-        } catch (error) {
-            console.error('Erro ao gerar QR Code:', error);
-            messageElement.innerText = "Erro ao gerar QR Code, tente novamente mais tarde.";
-        }
-    });
-    
+
+            try {
+                const response = await fetch(`/validate-key?accessKey=${accessKey}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const qrResponse = await fetch(`/generate-qr?phoneNumber=${phoneNumber}`);
+                    const qrResult = await qrResponse.json();
+
+                    if (qrResult.success) {
+                        document.getElementById('qrCodeImage').src = qrResult.qr;
+                        document.getElementById('qrCodeSection').style.display = 'block';
+                    } else {
+                        messageElement.innerText = qrResult.message;
+                    }
+                } else {
+                    messageElement.innerText = result.message;
+                }
+            } catch (error) {
+                console.error('Erro ao gerar QR Code:', error);
+                messageElement.innerText = "Erro ao gerar QR Code, tente novamente mais tarde.";
+            }
+        });
+    }
+
+    // Valida se estamos na página de login (index.html)
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const login = document.getElementById('login').value;
+            const senha = document.getElementById('senha').value;
+            const messageElement = document.getElementById('login-message');
+
+            if (!login || !senha) {
+                messageElement.innerText = "Por favor, preencha todos os campos.";
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login, senha }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    messageElement.innerText = result.message || "Erro ao realizar login.";
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                messageElement.innerText = "Erro ao realizar login, tente novamente mais tarde.";
+            }
+        });
+    }
+
     // Função para validar os campos do formulário (verificando se estão preenchidos)
     function validateForm(fields) {
         for (const field of fields) {
