@@ -151,10 +151,12 @@ app.post('/login', (req, res) => {
 
 // 🔹 Rota para gerar o QR Code sob demanda (via botão)
 app.get('/generate-qr', (req, res) => {
+    // Caso o QR Code já tenha sido gerado anteriormente
     if (global.qrCodeUrl) {
         return res.json({ success: true, qr: global.qrCodeUrl });
     }
 
+    // Se o QR Code ainda não foi gerado, aguardamos o evento 'qr' para gerar
     client.on('qr', (qr) => {
         qrcode.toDataURL(qr, (err, url) => {
             if (err) {
@@ -167,9 +169,10 @@ app.get('/generate-qr', (req, res) => {
         });
     });
 
-    // Caso o WhatsApp Web ainda não tenha gerado um QR Code
-    res.json({ success: false, message: "QR Code ainda não gerado." });
+    // Caso o QR Code ainda não tenha sido gerado e não tenha ocorrido o evento `qr`
+    // Não enviaremos a resposta até o evento ser disparado.
 });
+
 
 // 🔹 Configuração do servidor HTTP e WebSocket
 const server = http.createServer(app);
@@ -180,6 +183,21 @@ const client = new Client({
     authStrategy: new LocalAuth(),  
     puppeteer: { headless: true }
 });
+
+
+app.get('/validate-key', (req, res) => {
+    const chave = req.query.chave;  // Aqui estamos pegando o valor da chave na URL
+
+    // Verifique se a chave está presente no seu sistema (exemplo simples)
+    const validChaves = ['abc123', 'xyz456'];  // Adapte conforme sua lógica de validação
+
+    if (validChaves.includes(chave)) {
+        res.json({ success: true });
+    } else {
+        res.json({ success: false, message: 'Chave inválida' });
+    }
+});
+
 
 // 🔹 Evento para gerar e enviar o QR Code pelo WebSocket
 client.on('qr', (qr) => {
