@@ -1,90 +1,151 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Conectar ao WhatsApp</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="styles.css"> <!-- Arquivo CSS externo -->
 </head>
 <body>
-
-    <!-- Cabeçalho -->
     <header>
-        <h1>Conectar ao WhatsApp</h1>
+        <nav>
+            <a href="#" class="logo">Logo Empresa</a>
+            <ul class="nav-list">
+                <li><a href="login.html">Logout</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <!-- Conteúdo -->
-    <div class="content">
-        <h2>Insira sua chave de acesso</h2>
-        
-        <!-- Formulário para chave de acesso -->
+    <main>
+        <h1>Dashboard</h1>
+        <p>Bem-vindo ao seu painel de controle. Ative o bot e veja o QR Code.</p>
+
+        <div id="empresaInfo"></div>
+        <div id="activationStatus"></div>
+        <div id="expirationTime"></div>
+
         <form id="activationForm">
-            <div class="input-container">
-                <input type="text" id="accessKey" placeholder="Digite sua chave de acesso" required>
-            </div>
-            <button type="submit">Gerar QR Code</button>
+            <label for="accessKey">Chave de Acesso:</label>
+            <input type="text" id="accessKey" name="accessKey" required>
+
+            <label for="phoneNumber">Número de Telefone:</label>
+            <input type="text" id="phoneNumber" name="phoneNumber" required>
+
+            <button type="submit">Ativar Bot</button>
         </form>
 
-        <!-- Área onde o QR Code será exibido -->
-        <div id="qrCodeSection" style="display:none;">
-            <h3>Escaneie o QR Code abaixo:</h3>
-            <img id="qrCodeImage" src="" alt="QR Code">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARQAAAEUCAYAAADqcMl5AAAAAklEQVR4AewaftIAABJHSURBVO3BQY7YypLAQFLo+1+Z42WuChBU7ec/yAj7g7XWuuBhrbUueVhrrUse1lrrkoe11rrkYa21LnlYa61LHtZa65KHtda65GGttS55WGutSx7WWuuSh7XWuuRhrbUueVhrrUse1lrrkh8+UvmbKiaVqWJSmSpOVKaKSeWNiknli4pJZap4Q2WqOFGZKr5QOal4Q+WNijdUpopJZaqYVE4qJpW/qeKLh7XWuuRhrbUueVhrrUt+uKziJpUvKt6omFSmikllqrip4qRiUjmpOFGZKqaKSWWqmFROKr5QOamYVG5SmSp+U8VNKjc9rLXWJQ9rrXXJw1prXfLDL1N5o+KNikllqjhRmSp+U8UXKm9UTCpTxaTyRsUbFZPKVHGiMlWcqEwVk8obFZPKpPI3qbxR8Zse1lrrkoe11rrkYa21Lvnhf5zKVHGicqJyojJVvKEyVZyo3FRxUvGbVE5Upoqp4o2Kk4pJ5UTli4pJ5f+Th7XWuuRhrbUueVhrrUt++B9XMancVDGpTCpTxaQyVXxRcaJyovKbKqaKE5UTlaliUpkq3lA5qfhCZVKZKv4/eVhrrUse1lrrkoe11rrkh19W8TdVTCpTxaRyojJV3KQyVZyovKEyVUwqU8UbKpPKVDGp/CaVqWJSOamYVKaKSeWNipsq/iUPa611ycNaa13ysNZal/xwmcrfpDJVfFExqZyoTBW/qWJSmSomlS9UpoqTikllqphUpopJ5Y2KSWWqmFRuqphUTlSmihOVf9nDWmtd8rDWWpc8rLXWJT98VPEvUZkqJpUvVE5UpoqTiknlRGWqmFRuqvgvVbyhMlVMKlPFpHKiMlVMKm9UnFT8L3lYa61LHtZa65KHtda65IePVKaKSeWkYlJ5o2JSmVRuqphUpopJ5aTijYpJ5aT..." />
+        <button id="toggleBotButton">Ligar Bot</button>
+
+        <div id="qrCodeSection" style="display: none;">
+            <img id="qrCodeImage" alt="QR Code">
         </div>
+    </main>
 
-        <!-- Mensagem de erro ou sucesso -->
-        <div id="message"></div>
-    </div>
+    <footer>
+        <center><p>© 2025 Logo Empresa</p></center>
+    </footer>
 
-    <!-- Incluindo o Socket.io para escutar o QR Code -->
     <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
-
-    
     <script>
-        const socket = io();  // Conectando ao Socket.IO
-    
-        // Função para exibir o QR Code
-        function showQRCode(qr) {
-            if (qr) {
-                document.getElementById('qrCodeImage').src = `data:image/png;base64,${qr}`;
-                document.getElementById('qrCodeSection').style.display = 'block';
-            } else {
-                document.getElementById('message').innerText = 'Erro ao gerar QR Code.';
+        // Integrar o código da ativação e do bot conforme você forneceu
+        document.addEventListener("DOMContentLoaded", async function() {
+            const activationForm = document.getElementById("activationForm");
+            const toggleBotButton = document.getElementById("toggleBotButton");
+            const qrCodeSection = document.getElementById("qrCodeSection");
+            const qrCodeImage = document.getElementById("qrCodeImage");
+            const empresaInfo = document.getElementById("empresaInfo");
+            const expirationTime = document.getElementById("expirationTime");
+
+            // Verifica se o usuário está logado
+            const phoneNumber = localStorage.getItem("phoneNumber");
+
+            if (!phoneNumber) {
+                alert("Usuário não está logado.");
+                window.location.href = "login.html"; // Redireciona para o login se não estiver logado
+                return;
             }
-        }
-    
-        // Função para gerar QR Code com base na chave de acesso
-        document.getElementById('activationForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const accessKey = document.getElementById('accessKey').value;
-    
-            // Verificar validade da chave
-            const response = await fetch(`/validate-key?accessKey=${accessKey}`);
-            const result = await response.json();
-    
-            if (result.success) {
-                // Chave válida, então solicita o QR Code
-                const qrResponse = await fetch(`/generate-qr?accessKey=${accessKey}`);
-                const qrResult = await qrResponse.json();
-    
-                if (qrResult.success) {
-                    // Exibe o QR Code diretamente sem depender do Socket.IO
-                    document.getElementById('qrCodeImage').src = `data:image/png;base64,${qrResult.qr}`;
-                    document.getElementById('qrCodeSection').style.display = 'block';
+
+            // Função para carregar informações do usuário
+            const response = await fetch(`/usuario/${phoneNumber}`);
+            const userData = await response.json();
+
+            if (!response.ok) {
+                alert("Erro ao carregar dados do usuário.");
+                return;
+            }
+
+            // Exibe as informações da empresa e a validade da chave
+            document.getElementById('empresaInfo').textContent = `Empresa: ${userData.empresa}`;
+            updateActivationStatus(userData);
+
+            // Função para ativar o bot
+            activationForm.addEventListener("submit", async function(event) {
+                event.preventDefault();
+
+                const accessKey = document.getElementById("accessKey").value;
+                const phoneNumber = document.getElementById("phoneNumber").value;
+
+                // Valida a chave de acesso
+                const isKeyValid = await validateAccessKey(accessKey, phoneNumber);
+
+                if (isKeyValid) {
+                    // Chave válida, agora exibe o QR code
+                    const qrResponse = await fetch('https://botwhatsapp-oxct.onrender.com/generate-qr');
+                    const qrData = await qrResponse.json();
+
+                    if (qrResponse.ok) {
+                        qrCodeSection.style.display = 'block';
+                        qrCodeImage.src = qrData.qrCodeUrl;
+
+                        // Mostrar tempo restante e empresa
+                        const empresa = qrData.empresa;
+                        const expiresAt = new Date(qrData.expiresAt);
+                        const timeRemaining = formatTimeRemaining(expiresAt);
+
+                        empresaInfo.textContent = `Empresa: ${empresa}`;
+                        expirationTime.textContent = `Chave expira em: ${timeRemaining}`;
+                    } else {
+                        alert("Erro ao gerar QR Code. Tente novamente.");
+                    }
                 } else {
-                    document.getElementById('message').innerText = qrResult.message;
+                    alert("Chave inválida ou expirada! Entre em contato com o administrador.");
                 }
-            } else {
-                document.getElementById('message').innerText = result.message;
+            });
+
+            // Função para validar a chave de acesso
+            async function validateAccessKey(accessKey, phoneNumber) {
+                const response = await fetch(`/validate-key?accessKey=${accessKey}&phoneNumber=${phoneNumber}`);
+                const data = await response.json();
+                return data.isValid;
             }
-        });
-    
-        // Se ainda quiser ouvir o QR Code via WebSocket
-        socket.on('qr', (qr) => {
-            showQRCode(qr);
+
+            // Função para atualizar o status de ativação
+            function updateActivationStatus(userData) {
+                const expirationTime = new Date(userData.keyExpiration);
+                const now = new Date();
+                const timeDiff = expirationTime - now;
+
+                if (timeDiff <= 0) {
+                    document.getElementById('activationStatus').textContent = "Chave expirada!";
+                    document.getElementById('expirationTime').textContent = "A chave expirou, você precisa renová-la.";
+                } else {
+                    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    document.getElementById('activationStatus').textContent = "Chave ativa!";
+                    document.getElementById('expirationTime').textContent = `Tempo restante: ${daysRemaining} dias`;
+                }
+            }
+
+            // Função para formatar o tempo restante até a expiração
+            function formatTimeRemaining(expiresAt) {
+                const now = new Date();
+                const diff = expiresAt - now;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                return `${days} dias, ${hours} horas, ${minutes} minutos`;
+            }
         });
     </script>
-    
-
 </body>
 </html>

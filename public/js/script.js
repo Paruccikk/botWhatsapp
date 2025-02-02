@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Função para lidar com o envio do formulário e geração do QR Code
     document.getElementById('activationForm')?.addEventListener('submit', async function (event) {
         event.preventDefault();
-        
+
         const accessKey = document.getElementById('accessKey').value;
         const phoneNumber = document.getElementById('phoneNumber')?.value;
 
