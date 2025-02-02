@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             const data = await response.json();
             if (response.ok) {
-                alert(`Usuário cadastrado com sucesso! Chave de Acesso: ${data.accessKey}`);
+                alert(`Usuário cadastrado com sucesso! Chave de Acesso: ${data.chave}`);
                 carregarUsuarios();  // Atualiza a lista de usuários
             } else {
                 alert("Erro ao cadastrar usuário: " + data.error);

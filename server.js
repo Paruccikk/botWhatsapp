@@ -7,7 +7,6 @@ const socketIo = require('socket.io');
 const { Client, LocalAuth } = require('whatsapp-web.js'); // Autenticação local para evitar escaneamento contínuo do QR
 const qrcode = require('qrcode');
 
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -18,14 +17,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Caminho para o arquivo de dados
 const dataFilePath = path.join(__dirname, 'data', 'data.json');
 
+// Função para carregar os dados do arquivo JSON
 function loadData() {
-    if (!fs.existsSync(dataFilePath)) return [];
+    if (!fs.existsSync(dataFilePath)) return {};
     const rawData = fs.readFileSync(dataFilePath);
     return JSON.parse(rawData);
 }
 
+// Função para salvar os dados no arquivo JSON
 function saveData(data) {
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 4));
 }
@@ -42,15 +44,14 @@ app.get('/get-usuarios', (req, res) => {
 });
 
 // 🔹 Rota para renovar chave de acesso (+30 dias)
-// Supondo que você tenha um modelo de Usuário (User)
-const User = require('../models/User');
-
-app.post('/renovar-chave', async (req, res) => {
-    const { numero } = req.body;  // Número de telefone
+app.post('/renovar-chave', (req, res) => {
+    const { telefone } = req.body;  // Número de telefone
 
     try {
-        // Encontre o usuário pelo telefone
-        const usuario = await User.findOne({ telefone: numero });
+        const data = loadData();
+
+        // Verifica se o usuário existe
+        const usuario = data[telefone];
 
         if (!usuario) {
             return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -63,8 +64,8 @@ app.post('/renovar-chave', async (req, res) => {
         // Atualiza a chave de expiração
         usuario.chave_expiracao = novaDataExpiracao.getTime();  // Salva como timestamp
 
-        // Salva o usuário com a nova data de expiração
-        await usuario.save();
+        // Salva os dados atualizados no arquivo
+        saveData(data);
 
         res.json({ success: true, message: 'Chave renovada com sucesso!' });
     } catch (error) {
@@ -72,7 +73,6 @@ app.post('/renovar-chave', async (req, res) => {
         res.status(500).json({ error: 'Erro ao renovar chave' });
     }
 });
-
 
 // 🔹 Rota para cadastrar usuário
 app.post('/cadastro', (req, res) => {
@@ -98,7 +98,7 @@ app.post('/cadastro', (req, res) => {
             return res.status(400).json({ success: false, message: 'Telefone já cadastrado' });
         }
 
-        // Gera a chave de acesso (pode ser qualquer lógica de sua escolha)
+        // Gera a chave de acesso
         const chave = Math.random().toString(36).substr(2, 10);
         const chaveExpiracao = new Date().setDate(new Date().getDate() + 30); // Chave expira em 30 dias
 
@@ -125,7 +125,6 @@ app.post('/cadastro', (req, res) => {
     }
 });
 
-
 // 🔹 Rota para login
 app.post('/login', (req, res) => {
     const { login, senha } = req.body;
@@ -150,24 +149,6 @@ app.post('/login', (req, res) => {
     res.json({ success: true, message: 'Login realizado com sucesso!' });
 });
 
-
-// 🔹 Rota para validar chave de acesso
-app.get('/validate-key', (req, res) => {
-    const { chave } = req.query;
-    const data = loadData();
-    const user = data.find(user => user.chave === chave);
-    
-    if (!user) {
-        return res.status(400).json({ success: false, message: 'Chave de acesso inválida' });
-    }
-
-    if (new Date() > new Date(user.chave_expiracao)) {
-        return res.status(400).json({ success: false, message: 'Chave expirada' });
-    }
-
-    res.json({ success: true, telefone: user.telefone });
-});
-
 // 🔹 Rota para gerar o QR Code sob demanda (via botão)
 app.get('/generate-qr', (req, res) => {
     if (global.qrCodeUrl) {
@@ -189,7 +170,6 @@ app.get('/generate-qr', (req, res) => {
     // Caso o WhatsApp Web ainda não tenha gerado um QR Code
     res.json({ success: false, message: "QR Code ainda não gerado." });
 });
-
 
 // 🔹 Configuração do servidor HTTP e WebSocket
 const server = http.createServer(app);
@@ -213,7 +193,6 @@ client.on('qr', (qr) => {
         }
     });
 });
-
 
 client.on('ready', () => {
     console.log("✅ Cliente WhatsApp Web conectado com sucesso!");

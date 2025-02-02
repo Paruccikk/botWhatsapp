@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Valida se estamos na página de ativação (dashboard.html)
     const activationForm = document.getElementById('activationForm');
     if (activationForm) {
         activationForm.addEventListener('submit', async function (event) {
@@ -165,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert("Erro ao renovar chave: " + error.message);
         }
     };
-
+    
     // Função para carregar usuários na tabela do Dashboard (só na admin.html)
 if (window.location.pathname.includes('admin.html')) {
     const tabelaUsuarios = document.getElementById("usersTable")?.getElementsByTagName("tbody")[0];
