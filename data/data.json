@@ -1,10 +1,12 @@
-[
-    {
-        "usuario": "Parucci",
-        "telefone": "5511974921318",
-        "empresa": "ParucciDev",
-        "senha": "Soso@2578",
-        "chave": "jncatggudz",
-        "chave_expiracao": 1741029234462
+{
+    "5511974921318": {
+        "empresa": "Empresa A",
+        "chave": "abc123",
+        "chave_expiracao": "1618800000000"
+    },
+    "telefone2": {
+        "empresa": "Empresa B",
+        "chave": "xyz456",
+        "chave_expiracao": "1621800000000"
     }
-]
+}

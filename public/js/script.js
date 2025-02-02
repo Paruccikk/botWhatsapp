@@ -5,17 +5,17 @@ document.addEventListener('DOMContentLoaded', function () {
         activationForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            const accessKey = document.getElementById('accessKey').value;
+            const chave = document.getElementById('chave').value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const messageElement = document.getElementById('message');
 
-            if (!accessKey || !phoneNumber) {
+            if (!chave || !phoneNumber) {
                 messageElement.innerText = "Por favor, insira a chave de acesso e o número de telefone.";
                 return;
             }
 
             try {
-                const response = await fetch(`/validate-key?accessKey=${accessKey}`);
+                const response = await fetch(`/validate-key?chave=${chave}`);
                 const result = await response.json();
 
                 if (result.success) {
@@ -158,13 +158,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // Função para carregar usuários na tabela do Dashboard
     const tabelaUsuarios = document.getElementById("usersTable")?.getElementsByTagName("tbody")[0];
     async function carregarUsuarios() {
+        if (!tabelaUsuarios) {
+            console.error('Elemento de tabela não encontrado!');
+            return;
+        }
+
         try {
-            const response = await fetch("/get-usuarios");
+            const response = await fetch("data/data.json");  // Altere o caminho para o seu arquivo JSON
             if (!response.ok) throw new Error(`Erro ${response.status}: ${response.statusText}`);
             
             const usuarios = await response.json();
-            tabelaUsuarios.innerHTML = "";
-            
+
+            if (!usuarios || Object.keys(usuarios).length === 0) {
+                alert("Nenhum usuário encontrado.");
+                return;
+            }
+
+            tabelaUsuarios.innerHTML = "";  // Limpar a tabela antes de preencher
+
             Object.keys(usuarios).forEach(telefone => {
                 const userData = usuarios[telefone];
                 const row = tabelaUsuarios.insertRow();
@@ -182,11 +193,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Função para formatar a data de expiração da chave
     function formatarData(dataString) {
-        const data = new Date(Number(dataString)); // Certifique-se de que é um número
+        const data = new Date(Number(dataString));  // Certifique-se de que o valor seja um número
         if (isNaN(data)) {
             return "Data inválida";
         }
-        return data.toLocaleDateString("pt-BR"); // Formata a data como 'dd/mm/aaaa'
+        return data.toLocaleDateString("pt-BR");  // Formata a data como 'dd/mm/aaaa'
     }
 
     // Carregar usuários na página
