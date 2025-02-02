@@ -1,11 +1,17 @@
 {
     "5511974921318": {
-        "empresa": "Empresa A",
+        "usuario": "Parucci",
+        "telefone": "5511974921318",
+        "empresa": "DEV",
+        "senha": "senha123",
         "chave": "abc123",
         "chave_expiracao": "1618800000000"
     },
     "telefone2": {
+        "usuario": "Maria Oliveira",
+        "telefone": "telefone2",
         "empresa": "Empresa B",
+        "senha": "senha456",
         "chave": "xyz456",
         "chave_expiracao": "1621800000000"
     }

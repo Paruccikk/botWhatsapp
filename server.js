@@ -60,34 +60,47 @@ app.post('/renovar-chave', (req, res) => {
 app.post('/cadastro', (req, res) => {
     try {
         const { usuario, telefone, empresa, senha } = req.body;
+
+        // Verifica se todos os campos obrigatórios estão presentes
         if (!usuario || !telefone || !empresa || !senha) {
             return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios' });
         }
 
-        // Verificação para garantir que o telefone tem 11 dígitos e só números
+        // Valida o formato do telefone (deve ter 11 dígitos numéricos)
         const telefoneFormatado = telefone.replace(/[^\d]/g, '');
         if (telefoneFormatado.length !== 11) {
             return res.status(400).json({ success: false, message: 'Telefone inválido. Certifique-se de incluir 11 dígitos.' });
         }
 
+        // Carregar dados de usuários do arquivo JSON
         const data = loadData();
-        if (data.find(user => user.telefone === telefoneFormatado)) {
+
+        // Verifica se o telefone já está cadastrado
+        if (data[telefoneFormatado]) {
             return res.status(400).json({ success: false, message: 'Telefone já cadastrado' });
         }
 
+        // Gera a chave de acesso (pode ser qualquer lógica de sua escolha)
         const chave = Math.random().toString(36).substr(2, 10);
+        const chaveExpiracao = new Date().setDate(new Date().getDate() + 30); // Chave expira em 30 dias
+
+        // Cria um novo usuário
         const newUser = {
             usuario,
             telefone: telefoneFormatado,
             empresa,
-            senha,
+            senha, // Adiciona a senha
             chave,
-            chave_expiracao: new Date().setDate(new Date().getDate() + 30)
+            chave_expiracao: chaveExpiracao
         };
-        data.push(newUser);
+
+        // Adiciona o novo usuário no objeto de dados
+        data[telefoneFormatado] = newUser;
+
+        // Salva os dados de volta no arquivo JSON
         saveData(data);
 
-        res.json({ success: true });
+        res.json({ success: true, message: 'Cadastro realizado com sucesso!' });
     } catch (error) {
         console.error('Erro no cadastro:', error);
         res.status(500).json({ success: false, message: 'Erro interno do servidor' });
