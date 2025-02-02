@@ -7,6 +7,7 @@ const socketIo = require('socket.io');
 const { Client, LocalAuth } = require('whatsapp-web.js'); // Autenticação local para evitar escaneamento contínuo do QR
 const qrcode = require('qrcode');
 
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -41,20 +42,37 @@ app.get('/get-usuarios', (req, res) => {
 });
 
 // 🔹 Rota para renovar chave de acesso (+30 dias)
-app.post('/renovar-chave', (req, res) => {
-    const { numero } = req.body;
-    let data = loadData();
-    const userIndex = data.findIndex(user => user.telefone === numero);
+// Supondo que você tenha um modelo de Usuário (User)
+const User = require('../models/User');
 
-    if (userIndex === -1) {
-        return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+app.post('/renovar-chave', async (req, res) => {
+    const { numero } = req.body;  // Número de telefone
+
+    try {
+        // Encontre o usuário pelo telefone
+        const usuario = await User.findOne({ telefone: numero });
+
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        // Adiciona 30 dias à data de expiração da chave
+        const dataAtual = new Date();
+        const novaDataExpiracao = new Date(dataAtual.setDate(dataAtual.getDate() + 30));
+
+        // Atualiza a chave de expiração
+        usuario.chave_expiracao = novaDataExpiracao.getTime();  // Salva como timestamp
+
+        // Salva o usuário com a nova data de expiração
+        await usuario.save();
+
+        res.json({ success: true, message: 'Chave renovada com sucesso!' });
+    } catch (error) {
+        console.error("Erro ao renovar chave:", error);
+        res.status(500).json({ error: 'Erro ao renovar chave' });
     }
-
-    data[userIndex].chave_expiracao = new Date().setDate(new Date().getDate() + 30);
-    saveData(data);
-    
-    res.json({ success: true, message: 'Chave renovada com sucesso!' });
 });
+
 
 // 🔹 Rota para cadastrar usuário
 app.post('/cadastro', (req, res) => {

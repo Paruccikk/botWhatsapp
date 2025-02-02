@@ -63,23 +63,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Função para renovar a chave de um usuário
-    window.renovarChave = async function(telefone) {  // Passando o telefone como argumento
+    window.renovarChave = async function(telefone) {  
         try {
             const response = await fetch("/renovar-chave", { 
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ numero: telefone })  // Envia o telefone no corpo da requisição
+                body: JSON.stringify({ numero: telefone })  // Passando o número no corpo da requisição
             });
     
-            if (!response.ok) throw new Error("Erro ao renovar chave");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Erro desconhecido ao renovar chave');
+            }
+    
             alert("Chave renovada com sucesso!");
             carregarUsuarios();  // Atualiza a lista de usuários
         } catch (error) {
             alert("Erro ao renovar chave: " + error.message);
         }
     };
+    
 
     // Carregar os usuários assim que a página for carregada
     carregarUsuarios();
