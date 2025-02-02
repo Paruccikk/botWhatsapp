@@ -16,6 +16,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Função para carregar o arquivo JSON
+    async function carregarDadosUsuario() {
+        try {
+            const response = await fetch('/data/data.json');  // Caminho para o arquivo JSON
+            if (!response.ok) {
+                throw new Error('Falha ao carregar o arquivo JSON');
+            }
+
+            const data = await response.json();  // Converte a resposta para JSON
+            console.log(data);  // Exibe os dados do usuário
+
+            // Aqui você pode processar os dados, por exemplo:
+            // const usuario = data[0]; // Acessando o primeiro usuário no arquivo JSON
+            // console.log(usuario.empresa);  // Exemplo de como acessar os dados
+        } catch (error) {
+            console.error('Erro ao carregar o arquivo JSON:', error);
+        }
+    }
+
+    carregarDadosUsuario();  // Chama a função ao carregar a página
+
     // Função para lidar com o envio do formulário e geração do QR Code
     document.getElementById('activationForm')?.addEventListener('submit', async function (event) {
         event.preventDefault();
