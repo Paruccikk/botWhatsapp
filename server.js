@@ -8,36 +8,55 @@ const { Client, LocalAuth } = require('whatsapp-web.js'); // Autenticação loca
 const qrcode = require('qrcode');
 
 const app = express();
-// Usar a porta fornecida pelo ambiente (Render) ou 3000 localmente
 const port = process.env.PORT || 3000;
 
-// Middleware para parsear JSON
 app.use(bodyParser.json());
-
-// Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve a página inicial
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Caminho para o arquivo de dados
 const dataFilePath = path.join(__dirname, 'data', 'data.json');
 
-// Função para carregar dados de usuários
 function loadData() {
     if (!fs.existsSync(dataFilePath)) return [];
     const rawData = fs.readFileSync(dataFilePath);
     return JSON.parse(rawData);
 }
 
-// Função para salvar os dados de usuários
 function saveData(data) {
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 4));
 }
 
-// 🔹 Rota para cadastro de usuário
+// 🔹 Rota para obter todos os usuários (Admin)
+app.get('/get-usuarios', (req, res) => {
+    try {
+        const usuarios = loadData();
+        res.json(usuarios);
+    } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+        res.status(500).json({ error: "Erro ao buscar usuários" });
+    }
+});
+
+// 🔹 Rota para renovar chave de acesso (+30 dias)
+app.post('/renovar-chave', (req, res) => {
+    const { numero } = req.body;
+    let data = loadData();
+    const userIndex = data.findIndex(user => user.telefone === numero);
+
+    if (userIndex === -1) {
+        return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+    }
+
+    data[userIndex].chave_expiracao = new Date().setDate(new Date().getDate() + 30);
+    saveData(data);
+    
+    res.json({ success: true, message: 'Chave renovada com sucesso!' });
+});
+
+// 🔹 Rota para cadastrar usuário
 app.post('/cadastro', (req, res) => {
     try {
         const { usuario, telefone, empresa, senha } = req.body;
@@ -118,7 +137,7 @@ const io = socketIo(server);
 
 // 🔹 Inicialização do WhatsApp Web Client
 const client = new Client({
-    authStrategy: new LocalAuth(),  // Autenticação local para evitar escaneamentos repetidos
+    authStrategy: new LocalAuth(),  
     puppeteer: { headless: true }
 });
 
@@ -128,19 +147,17 @@ client.on('qr', (qr) => {
         if (err) {
             console.error("Erro ao converter QR Code:", err);
         } else {
-            global.qrCodeUrl = url; // Armazena o QR Code globalmente
-            io.emit('qr', url); // Envia para os clientes via WebSocket
+            global.qrCodeUrl = url;
+            io.emit('qr', url);
             console.log("QR Code gerado e enviado para os clientes.");
         }
     });
 });
 
-// 🔹 Evento quando o WhatsApp Web estiver pronto
 client.on('ready', () => {
     console.log("✅ Cliente WhatsApp Web conectado com sucesso!");
 });
 
-// 🔹 Evento para capturar mensagens recebidas
 client.on('message', async (message) => {
     console.log(`📩 Mensagem de ${message.from}: ${message.body}`);
     if (!message.from.includes("@g.us")) {
@@ -153,12 +170,10 @@ client.on('message', async (message) => {
     }
 });
 
-// 🔹 Inicializar o WhatsApp Web
 client.initialize().catch(error => {
     console.error("❌ Erro ao inicializar o WhatsApp Web:", error);
 });
 
-// 🔹 Iniciar o servidor
 server.listen(port, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${port}`);
 });
