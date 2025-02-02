@@ -16,13 +16,17 @@
             <label for="phoneNumber">Número de Telefone:</label>
             <input type="text" id="phoneNumber" placeholder="Ex: 5511998765432" required>
             
-            <button type="submit">Gerar QR Code</button>
+            <!-- Exemplo de HTML para o botão de gerar QR Code -->
+            <button id="btn-gerar-qr">Gerar QR Code</button>
+            
+
         </form>
         
         <p id="message"></p>
         
         <div id="qrCodeSection" style="display: none;">
             <h3>Escaneie o QR Code abaixo:</h3>
+            <img id="qr-code" style="display:none;" alt="QR Code">
             <img id="qrCodeImage" alt="QR Code">
         </div>
     </div>

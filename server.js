@@ -122,14 +122,28 @@ app.get('/validate-key', (req, res) => {
     res.json({ success: true, telefone: user.telefone });
 });
 
-// 🔹 Rota para gerar o QR Code (via API)
+// 🔹 Rota para gerar o QR Code sob demanda (via botão)
 app.get('/generate-qr', (req, res) => {
     if (global.qrCodeUrl) {
-        res.json({ success: true, qr: global.qrCodeUrl });
-    } else {
-        res.json({ success: false, message: "QR Code não disponível no momento." });
+        return res.json({ success: true, qr: global.qrCodeUrl });
     }
+
+    client.on('qr', (qr) => {
+        qrcode.toDataURL(qr, (err, url) => {
+            if (err) {
+                console.error("Erro ao converter QR Code:", err);
+                return res.status(500).json({ success: false, message: "Erro ao gerar o QR Code." });
+            }
+
+            global.qrCodeUrl = url;  // Armazenamos o QR Code gerado
+            return res.json({ success: true, qr: global.qrCodeUrl });  // Retorna o QR Code gerado
+        });
+    });
+
+    // Caso o WhatsApp Web ainda não tenha gerado um QR Code
+    res.json({ success: false, message: "QR Code ainda não gerado." });
 });
+
 
 // 🔹 Configuração do servidor HTTP e WebSocket
 const server = http.createServer(app);
@@ -148,11 +162,12 @@ client.on('qr', (qr) => {
             console.error("Erro ao converter QR Code:", err);
         } else {
             global.qrCodeUrl = url;
-            io.emit('qr', url);
+            io.emit('qr', url);  // Envia o QR Code para o cliente via WebSocket (se necessário)
             console.log("QR Code gerado e enviado para os clientes.");
         }
     });
 });
+
 
 client.on('ready', () => {
     console.log("✅ Cliente WhatsApp Web conectado com sucesso!");

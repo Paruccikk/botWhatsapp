@@ -38,6 +38,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    document.getElementById('btn-gerar-qr').addEventListener('click', async function () {
+        try {
+            const response = await fetch('/generate-qr');
+            const data = await response.json();
+    
+            if (data.success) {
+                const qrCodeImage = document.getElementById('qr-code');
+                qrCodeImage.src = data.qr;  // Atualiza o src com o QR Code gerado
+                qrCodeImage.style.display = 'block';  // Exibe a imagem
+            } else {
+                alert('Erro ao gerar QR Code: ' + data.message);
+            }
+        } catch (error) {
+            alert('Erro ao gerar QR Code: ' + error.message);
+        }
+    });
+
+    
     // Valida se estamos na página de login (index.html)
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
