@@ -10,6 +10,16 @@ const qrcode = require('qrcode');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Inicializa o cliente do WhatsApp Web
+const client = new Client({
+    authStrategy: new LocalAuth(),
+    puppeteer: { headless: true }
+});
+
+// 🔹 Configuração do servidor HTTP e WebSocket
+const server = http.createServer(app);
+const io = socketIo(server);
+
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -125,28 +135,34 @@ app.post('/cadastro', (req, res) => {
     }
 });
 
-// 🔹 Rota para login
-app.post('/login', (req, res) => {
-    const { login, senha } = req.body;
+// 🔹 Rota para validar chave de acesso
+app.get('/validate-key', (req, res) => {
+    const chave = req.query.chave;  // Aqui estamos pegando o valor da chave na URL
 
-    // Carregar os dados dos usuários
-    const data = loadData();
+    // Carregar o arquivo JSON
+    fs.readFile('usuarios.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error("Erro ao ler o arquivo:", err);
+            return res.status(500).json({ success: false, message: "Erro no servidor." });
+        }
 
-    // Verifica se o usuário existe e a senha está correta
-    const user = Object.values(data).find(user => user.usuario === login && user.senha === senha);
+        const usuarios = JSON.parse(data);  // Parseia o conteúdo do arquivo JSON
+        let chaveValida = false;
 
-    // Se o usuário não for encontrado ou a senha estiver errada
-    if (!user) {
-        return res.status(400).json({ success: false, message: 'Usuário ou senha inválidos' });
-    }
+        // Verificar se a chave existe no arquivo JSON
+        for (let usuario in usuarios) {
+            if (usuarios[usuario].chave === chave) {
+                chaveValida = true;
+                break; // Se encontrar a chave, não precisa continuar verificando
+            }
+        }
 
-    // Verifica se a chave de acesso expirou
-    if (new Date() > new Date(user.chave_expiracao)) {
-        return res.status(400).json({ success: false, message: 'Chave expirada' });
-    }
-
-    // Login bem-sucedido
-    res.json({ success: true, message: 'Login realizado com sucesso!' });
+        if (chaveValida) {
+            res.json({ success: true });
+        } else {
+            res.json({ success: false, message: 'Chave inválida' });
+        }
+    });
 });
 
 // 🔹 Rota para gerar o QR Code sob demanda (via botão)
@@ -172,32 +188,6 @@ app.get('/generate-qr', (req, res) => {
     // Caso o QR Code ainda não tenha sido gerado e não tenha ocorrido o evento `qr`
     // Não enviaremos a resposta até o evento ser disparado.
 });
-
-
-// 🔹 Configuração do servidor HTTP e WebSocket
-const server = http.createServer(app);
-const io = socketIo(server);
-
-// 🔹 Inicialização do WhatsApp Web Client
-const client = new Client({
-    authStrategy: new LocalAuth(),  
-    puppeteer: { headless: true }
-});
-
-
-app.get('/validate-key', (req, res) => {
-    const chave = req.query.chave;  // Aqui estamos pegando o valor da chave na URL
-
-    // Verifique se a chave está presente no seu sistema (exemplo simples)
-    const validChaves = ['abc123', 'xyz456'];  // Adapte conforme sua lógica de validação
-
-    if (validChaves.includes(chave)) {
-        res.json({ success: true });
-    } else {
-        res.json({ success: false, message: 'Chave inválida' });
-    }
-});
-
 
 // 🔹 Evento para gerar e enviar o QR Code pelo WebSocket
 client.on('qr', (qr) => {
