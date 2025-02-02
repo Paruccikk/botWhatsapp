@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
 
             const chave = document.getElementById('chave').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
+            const telefone = document.getElementById('phoneNumber').value;
             const messageElement = document.getElementById('message');
 
             if (!chave || !phoneNumber) {
@@ -18,8 +18,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const result = await response.json();
 
                 if (result.success) {
-                    const qrResponse = await fetch(`/generate-qr?phoneNumber=${phoneNumber}`);
-                    const qrResult = await qrResponse.json();
+                    const telefone = document.getElementById('phoneNumber').value;
+                    const qrResponse = await fetch(`/generate-qr?telefone=${telefone}`);
+
 
                     if (qrResult.success) {
                         document.getElementById('qrCodeImage').src = qrResult.qr;
