@@ -38,32 +38,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.getElementById('btn-gerar-qr').addEventListener('click', async function () {
-        try {
-            const response = await fetch('/generate-qr');
-            const data = await response.json();
-    
-            if (data.success) {
-                const qrCodeImage = document.getElementById('qr-code');
-                qrCodeImage.src = data.qr;  // Atualiza o src com o QR Code gerado
-                qrCodeImage.style.display = 'block';  // Exibe a imagem
-            } else {
-                alert('Erro ao gerar QR Code: ' + data.message);
-            }
-        } catch (error) {
-            alert('Erro ao gerar QR Code: ' + error.message);
-        }
-    });
-
-    
     // Valida se estamos na página de login (index.html)
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            const login = document.getElementById('login').value;
-            const senha = document.getElementById('senha').value;
+            const login = document.getElementById('login');
+            const senha = document.getElementById('senha');
             const messageElement = document.getElementById('login-message');
 
             if (!login || !senha) {
@@ -75,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ login, senha }),
+                    body: JSON.stringify({ login: login.value, senha: senha.value }),
                 });
 
                 const result = await response.json();
@@ -92,22 +74,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Função para validar os campos do formulário (verificando se estão preenchidos)
-    function validateForm(fields) {
-        for (const field of fields) {
-            if (!field.value) {
-                alert(`Por favor, preencha o campo ${field.placeholder}`);
-                return false;
-            }
-        }
-        return true;
-    }
-
     // Cadastro
     document.getElementById('cadastro-form')?.addEventListener('submit', async function (event) {
         event.preventDefault(); // Impede o envio tradicional do formulário
 
-        // Pega os valores dos campos de cadastro
         const usuario = document.getElementById('usuario');
         const telefone = document.getElementById('telefone');
         const empresa = document.getElementById('empresa');
@@ -124,12 +94,9 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         try {
-            // Faz a requisição POST para o backend para registrar o usuário
             const response = await fetch('/cadastro', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
             });
 
@@ -147,41 +114,81 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Login
-    document.getElementById('login-form')?.addEventListener('submit', async function (event) {
-        event.preventDefault();
+    // Função para validar os campos do formulário (verificando se estão preenchidos)
+    function validateForm(fields) {
+        for (const field of fields) {
+            if (!field.value) {
+                alert(`Por favor, preencha o campo ${field.placeholder}`);
+                return false;
+            }
+        }
+        return true;
+    }
 
-        const login = document.getElementById('login');
-        const senha = document.getElementById('senha');
-
-        // Valida os campos antes de enviar
-        if (!validateForm([login, senha])) return;
-
-        const loginData = {
-            login: login.value,
-            senha: senha.value,
-        };
-
+    // Evento para o botão de gerar QR Code no Dashboard
+    document.getElementById('btn-gerar-qr')?.addEventListener('click', async function () {
         try {
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(loginData),
-            });
-
-            const result = await response.json();
-            console.log('Resposta do servidor:', result);
-
-            if (result.success) {
-                window.location.href = 'dashboard.html';
+            const response = await fetch('/generate-qr');
+            const data = await response.json();
+    
+            if (data.success) {
+                const qrCodeImage = document.getElementById('qr-code');
+                qrCodeImage.src = data.qr;  // Atualiza o src com o QR Code gerado
+                qrCodeImage.style.display = 'block';  // Exibe a imagem
             } else {
-                alert(result.message || 'Erro ao realizar login');
+                alert('Erro ao gerar QR Code: ' + data.message);
             }
         } catch (error) {
-            console.error('Erro no login:', error);
-            alert('Erro ao realizar login, tente novamente mais tarde.');
+            alert('Erro ao gerar QR Code: ' + error.message);
         }
     });
+
+    // Função para renovar chave no Dashboard
+    window.renovarChave = async function(telefone) {
+        try {
+            const response = await fetch(`/renovar-chave?telefone=${telefone}`, { method: "POST" });
+            if (!response.ok) throw new Error("Erro ao renovar chave");
+            alert("Chave renovada com sucesso!");
+            carregarUsuarios();
+        } catch (error) {
+            alert("Erro ao renovar chave: " + error.message);
+        }
+    };
+
+    // Função para carregar usuários na tabela do Dashboard
+    const tabelaUsuarios = document.getElementById("usersTable")?.getElementsByTagName("tbody")[0];
+    async function carregarUsuarios() {
+        try {
+            const response = await fetch("/get-usuarios");
+            if (!response.ok) throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            
+            const usuarios = await response.json();
+            tabelaUsuarios.innerHTML = "";
+            
+            Object.keys(usuarios).forEach(telefone => {
+                const userData = usuarios[telefone];
+                const row = tabelaUsuarios.insertRow();
+                row.insertCell(0).textContent = telefone;
+                row.insertCell(1).textContent = userData.empresa;
+                row.insertCell(2).textContent = userData.chave;
+                row.insertCell(3).textContent = formatarData(userData.chave_expiracao);
+                row.insertCell(4).innerHTML = `<button class="btn-renovar" onclick="renovarChave('${telefone}')">🔄 Renovar</button>`;
+            });
+        } catch (error) {
+            console.error("Erro ao carregar usuários:", error);
+            alert(error.message);
+        }
+    }
+
+    // Função para formatar a data de expiração da chave
+    function formatarData(dataString) {
+        const data = new Date(Number(dataString)); // Certifique-se de que é um número
+        if (isNaN(data)) {
+            return "Data inválida";
+        }
+        return data.toLocaleDateString("pt-BR"); // Formata a data como 'dd/mm/aaaa'
+    }
+
+    // Carregar usuários na página
+    carregarUsuarios();
 });
