@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Conectar ao WhatsApp</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Arquivo CSS externo -->
+</head>
+<body>
+
+    <!-- Cabeçalho -->
+    <header>
+        <h1>Conectar ao WhatsApp</h1>
+    </header>
+
+    <!-- Conteúdo -->
+    <div class="content">
+        <h2>Insira sua chave de acesso</h2>
+        
+        <!-- Formulário para chave de acesso -->
+        <form id="activationForm">
+            <div class="input-container">
+                <input type="text" id="accessKey" placeholder="Digite sua chave de acesso" required>
+            </div>
+            <button type="submit">Gerar QR Code</button>
+        </form>
+
+        <!-- Área onde o QR Code será exibido -->
+        <div id="qrCodeSection" style="display:none;">
+            <h3>Escaneie o QR Code abaixo:</h3>
+            <img id="qrCodeImage" src="" alt="QR Code">
+        </div>
+
+        <!-- Mensagem de erro ou sucesso -->
+        <div id="message"></div>
+    </div>
+
+    <!-- Incluindo o Socket.io para escutar o QR Code -->
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+
+    
+    <script>
+        const socket = io();  // Conectando ao Socket.IO
+    
+        // Função para exibir o QR Code
+        function showQRCode(qr) {
+            if (qr) {
+                document.getElementById('qrCodeImage').src = `data:image/png;base64,${qr}`;
+                document.getElementById('qrCodeSection').style.display = 'block';
+            } else {
+                document.getElementById('message').innerText = 'Erro ao gerar QR Code.';
+            }
+        }
+    
+        // Função para gerar QR Code com base na chave de acesso
+        document.getElementById('activationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const accessKey = document.getElementById('accessKey').value;
+    
+            // Verificar validade da chave
+            const response = await fetch(`/validate-key?accessKey=${accessKey}`);
+            const result = await response.json();
+    
+            if (result.success) {
+                // Chave válida, então solicita o QR Code
+                const qrResponse = await fetch(`/generate-qr?accessKey=${accessKey}`);
+                const qrResult = await qrResponse.json();
+    
+                if (qrResult.success) {
+                    // Exibe o QR Code diretamente sem depender do Socket.IO
+                    document.getElementById('qrCodeImage').src = `data:image/png;base64,${qrResult.qr}`;
+                    document.getElementById('qrCodeSection').style.display = 'block';
+                } else {
+                    document.getElementById('message').innerText = qrResult.message;
+                }
+            } else {
+                document.getElementById('message').innerText = result.message;
+            }
+        });
+    
+        // Se ainda quiser ouvir o QR Code via WebSocket
+        socket.on('qr', (qr) => {
+            showQRCode(qr);
+        });
+    </script>
+    
+
+</body>
+</html>

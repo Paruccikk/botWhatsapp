@@ -1,0 +1,15 @@
+WoWAtende/
+├── public/
+│   ├── index.html
+│   ├── cadastro.html
+│   ├── dashboard.html
+│   ├── js/
+│   │   └── script.js 
+├── src/
+│   ├── js/
+│   │   └── server.js
+│   |
+│   │   
+└── package.json
+|── data/
+    └── data.json
