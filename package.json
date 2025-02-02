@@ -11,7 +11,7 @@
     "whatsapp-web.js": "^1.26.0"
   },
   "scripts": {
-    "start": "node src/js/server.js"
+    "start": "./start.sh"
   },
   "author": "",
   "license": "ISC"
