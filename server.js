@@ -11,11 +11,17 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Inicializa o cliente do WhatsApp Web
-const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        executablePath: '/usr/bin/chromium-browser'  // O caminho pode variar dependendo do ambiente
-    }
+const chromeLauncher = require('chrome-launcher');
+
+chromeLauncher.launch().then(chrome => {
+    const client = new Client({
+        authStrategy: new LocalAuth(),
+        puppeteer: {
+            executablePath: chrome.chromePath  // Isso pega o caminho dinâmico
+        }
+    });
+
+    // Resto do seu código
 });
 
 
@@ -233,3 +239,5 @@ client.initialize().catch(error => {
 server.listen(port, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${port}`);
 });
+
+console.log('Puppeteer Path:', puppeteer.executablePath());
