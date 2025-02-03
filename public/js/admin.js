@@ -89,44 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Carregar os usuários assim que a página for carregada
     carregarUsuarios();
 
-    // Função para ativar/desativar o bot
-async function toggleBot(telefone) {
-    const response = await fetch(`/toggle-bot?telefone=${telefone}`, {
-        method: 'POST'
-    });
-    const result = await response.json();
-    if (result.success) {
-        alert(`Bot para ${telefone} ${result.message}`);
-        carregarUsuarios();  // Atualiza a lista de usuários
-    } else {
-        alert('Erro ao alterar o status do bot');
-    }
-}
-
-// Função para carregar os usuários na tabela
-async function carregarUsuarios() {
-    const response = await fetch('/get-usuarios');
-    const usuarios = await response.json();
-
-    const tabelaUsuarios = document.querySelector("#usersTable tbody");
-    tabelaUsuarios.innerHTML = ''; // Limpa a tabela
-
-    Object.keys(usuarios).forEach(telefone => {
-        const usuario = usuarios[telefone];
-        const row = tabelaUsuarios.insertRow();
-
-        row.insertCell(0).textContent = usuario.telefone;
-        row.insertCell(1).textContent = usuario.empresa;
-        row.insertCell(2).textContent = usuario.chave;
-        row.insertCell(3).textContent = new Date(usuario.chave_expiracao).toLocaleDateString('pt-BR');
-        row.insertCell(4).innerHTML = `<button onclick="toggleBot('${telefone}')">${usuario.ativo ? 'Desativar Bot' : 'Ativar Bot'}</button>`;
-    });
-}
-
-// Carregar os usuários quando a página carregar
-carregarUsuarios();
-
-
+    
 });
 
 

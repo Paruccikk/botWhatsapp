@@ -15,32 +15,48 @@
             
             <label for="telefone">Número de Telefone:</label>
             <input type="text" id="telefone" placeholder="Ex: 11998765432" required>
-            
         </form>
         
         <p id="message"></p>
 
-        <!-- Adicionando o botão de ativação/desativação do bot -->
-        <button id="toggleBotButton">Ativar Bot</button>
-        
+        <!-- Botão para gerar QR Code -->
+        <button id="generateQRCodeButton">Gerar QR Code</button>
+
+        <!-- Botão para ativar o bot (somente após escanear o QR Code) -->
+        <button id="activateBotButton" style="display:none;">Ativar Bot</button>
+
         <div id="qrCodeSection" style="display: none;">
             <h3>Escaneie o QR Code abaixo:</h3>
-            <img id="qr-code" style="display:none;" alt="QR Code">
-            <img id="qrCodeImage" alt="QR Code">
+            <img id="qrCodeImage" alt="QR Code" />
         </div>
     </div>
     
     <script src="/js/script.js"></script>
     <script>
-        // Função para ativar o bot
-        document.getElementById('toggleBotButton').addEventListener('click', async () => {
+        // Função para gerar o QR Code
+        document.getElementById('generateQRCodeButton').addEventListener('click', async () => {
             const telefone = document.getElementById('telefone').value;
-            const response = await fetch(`/toggle-bot?telefone=${telefone}`, { method: 'POST' });
+            const response = await fetch(`/generate-qr?telefone=${telefone}`);
             const result = await response.json();
             if (result.success) {
-                alert(`Bot ${result.message} para o usuário ${telefone}`);
+                // Exibe o QR Code na tela
+                document.getElementById('qrCodeImage').src = result.qr;
+                document.getElementById('qrCodeSection').style.display = 'block';
+                document.getElementById('activateBotButton').style.display = 'inline'; // Exibe o botão para ativar o bot
             } else {
-                alert('Erro ao alterar o status do bot');
+                alert('Erro ao gerar QR Code.');
+            }
+        });
+
+        // Função para ativar o bot após escanear o QR Code
+        document.getElementById('activateBotButton').addEventListener('click', async () => {
+            const telefone = document.getElementById('telefone').value;
+            const response = await fetch(`/activate-bot?telefone=${telefone}`, { method: 'POST' });
+            const result = await response.json();
+            if (result.success) {
+                alert('Bot ativado com sucesso!');
+            } else {
+                alert('Erro ao ativar o bot.');
             }
         });
     </script>
