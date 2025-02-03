@@ -13,8 +13,11 @@ const port = process.env.PORT || 3000;
 // Inicializa o cliente do WhatsApp Web
 const client = new Client({
     authStrategy: new LocalAuth(),
-    puppeteer: { headless: true }
+    puppeteer: {
+        executablePath: '/usr/bin/chromium-browser'  // O caminho pode variar dependendo do ambiente
+    }
 });
+
 
 // 🔹 Configuração do servidor HTTP e WebSocket
 const server = http.createServer(app);
