@@ -21,9 +21,6 @@ chromeLauncher.launch().then(chrome => {
         }
     });
 
-    // Resto do seu código
-});
-
 
 // 🔹 Configuração do servidor HTTP e WebSocket
 const server = http.createServer(app);
@@ -241,3 +238,6 @@ server.listen(port, () => {
 });
 
 console.log('Puppeteer Path:', puppeteer.executablePath());
+
+
+});
