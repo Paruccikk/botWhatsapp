@@ -16,13 +16,12 @@
             <label for="telefone">Número de Telefone:</label>
             <input type="text" id="telefone" placeholder="Ex: 11998765432" required>
             
-            <!-- Exemplo de HTML para o botão de gerar QR Code -->
-            <button id="btn-gerar-qr">Gerar QR Code</button>
-            
-
         </form>
         
         <p id="message"></p>
+
+        <!-- Adicionando o botão de ativação/desativação do bot -->
+        <button id="toggleBotButton">Ativar Bot</button>
         
         <div id="qrCodeSection" style="display: none;">
             <h3>Escaneie o QR Code abaixo:</h3>
@@ -32,5 +31,18 @@
     </div>
     
     <script src="/js/script.js"></script>
+    <script>
+        // Função para ativar o bot
+        document.getElementById('toggleBotButton').addEventListener('click', async () => {
+            const telefone = document.getElementById('telefone').value;
+            const response = await fetch(`/toggle-bot?telefone=${telefone}`, { method: 'POST' });
+            const result = await response.json();
+            if (result.success) {
+                alert(`Bot ${result.message} para o usuário ${telefone}`);
+            } else {
+                alert('Erro ao alterar o status do bot');
+            }
+        });
+    </script>
 </body>
 </html>

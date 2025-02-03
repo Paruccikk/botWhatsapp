@@ -5,14 +5,16 @@
         "empresa": "DEV",
         "senha": "senha123",
         "chave": "abc123",
-        "chave_expiracao": "1698768000000" 
+        "chave_expiracao": "1698768000000",
+        "ativo": false 
     },
     "11996712153": {
-        "usuario": "Daniel",
+        "usuario": "Daniel Parucci",
         "telefone": "11996712153",
         "empresa": "Parucci",
         "senha": "senha2578",
         "chave": "xojv2lsjoc",
-        "chave_expiracao": "1740960000000"
+        "chave_expiracao": "1740960000000",
+        "ativo": true  
     }
 }

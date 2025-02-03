@@ -242,6 +242,93 @@ client.on('message', async (message) => {
     }
 });
 
+// Rota para ativar/desativar o bot para um usuário específico
+app.post('/toggle-bot', (req, res) => {
+    const { telefone } = req.query;
+    
+    // Carregar os dados
+    const data = loadData();
+    
+    // Verifica se o usuário existe
+    if (!data[telefone]) {
+        return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+    }
+
+    // Alterna o status de 'ativo'
+    const usuario = data[telefone];
+    usuario.ativo = !usuario.ativo;  // Ativa ou desativa o bot
+
+    // Salva as alterações no arquivo
+    saveData(data);
+
+    // Responde com sucesso
+    res.json({
+        success: true,
+        message: usuario.ativo ? 'ativado' : 'desativado'
+    });
+
+    // Se o bot foi ativado, iniciar o bot para este usuário
+    if (usuario.ativo) {
+        iniciarBotParaUsuario(telefone);
+    }
+});
+
+// Rota para ativar/desativar o bot para um usuário específico
+app.post('/toggle-bot', (req, res) => {
+    const { telefone } = req.query;
+    
+    // Carregar os dados
+    const data = loadData();
+    
+    // Verifica se o usuário existe
+    if (!data[telefone]) {
+        return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+    }
+
+    // Alterna o status de 'ativo'
+    const usuario = data[telefone];
+    usuario.ativo = !usuario.ativo;  // Ativa ou desativa o bot
+
+    // Salva as alterações no arquivo
+    saveData(data);
+
+    // Responde com sucesso
+    res.json({
+        success: true,
+        message: usuario.ativo ? 'ativado' : 'desativado'
+    });
+
+    // Se o bot foi ativado, iniciar o bot para este usuário
+    if (usuario.ativo) {
+        iniciarBotParaUsuario(telefone);
+    }
+});
+
+// Função para iniciar o bot para um usuário
+function iniciarBotParaUsuario(telefone) {
+    const usuario = loadData()[telefone];
+
+    // Lógica para iniciar uma nova instância do cliente WhatsApp para esse usuário
+    const client = new Client({
+        authStrategy: new LocalAuth(),
+        puppeteer: { headless: true },
+    });
+
+    client.on('message', async (message) => {
+        console.log(`Mensagem recebida de ${message.from}: ${message.body}`);
+
+        if (!message.from.includes('@g.us')) {
+            const resposta = await getMistralResponse(message.body);
+            await client.sendMessage(message.from, resposta);
+        }
+    });
+
+    client.initialize().catch((error) => {
+        console.error(`Erro ao inicializar o cliente para ${telefone}:`, error);
+    });
+}
+
+
 client.initialize().catch(error => {
     console.error("❌ Erro ao inicializar o WhatsApp Web:", error);
 });
